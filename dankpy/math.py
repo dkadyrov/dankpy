@@ -3,7 +3,7 @@ import numpy as np
 
 def distance(x1, y1, x2, y2):
     """
-    Calculates distance between two points   
+    Calculates distance between two points
 
     Args:
         x1 (float): x coordinate of point 1
@@ -41,19 +41,19 @@ def circle_intersection(x0, y0, r0, x1, y1, r1, x2=None, y2=None, r2=None):
     dx = x1 - x0
     dy = y1 - y0
 
-    d = np.sqrt(dy ** 2 + dx ** 2)
+    d = np.sqrt(dy**2 + dx**2)
 
     if d > (r0 + r1):
         return []
     if d < abs(r0 - r1):
         return []
 
-    a = (r0 ** 2 - r1 ** 2 + d ** 2) / (2 * d)
+    a = (r0**2 - r1**2 + d**2) / (2 * d)
 
     p_x = x0 + (dx * a / d)
     p_y = y0 + (dy * a / d)
 
-    h = np.sqrt(r0 ** 2 - a ** 2)
+    h = np.sqrt(r0**2 - a**2)
 
     rx = -dy * (h / d)
     ry = dx * (h / d)
@@ -72,11 +72,11 @@ def circle_intersection(x0, y0, r0, x1, y1, r1, x2=None, y2=None, r2=None):
     else:
         dx = point1_x - x2
         dy = point1_y - y2
-        d1 = np.sqrt(dy ** 2 + dx ** 2)
+        d1 = np.sqrt(dy**2 + dx**2)
 
         dx = point2_x - x2
         dy = point2_y - y2
-        d2 = np.sqrt(dy ** 2 + dx ** 2)
+        d2 = np.sqrt(dy**2 + dx**2)
 
         if abs(d1 - r2) < epsilon:
             intersections.append([point1_x, point1_y])

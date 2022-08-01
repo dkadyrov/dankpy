@@ -2,6 +2,7 @@ import xlrd
 import dateutil.parser as parser
 from datetime import datetime, timedelta
 
+
 def read_datetime(string):
     """
     Reads and converts datetime
@@ -12,9 +13,9 @@ def read_datetime(string):
     Returns:
         datetime.Datetime: converted datetime
     """
-    try: 
+    try:
         dt = datetime.strptime(string, "%Y_%m_%d")
-    except: 
+    except:
         dt = parser.parse(string)
 
     return dt

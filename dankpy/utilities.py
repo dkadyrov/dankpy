@@ -3,15 +3,17 @@ import numpy as np
 from datetime import datetime, timedelta
 import math
 import pandas as pd
+
 # from detect_delimiter import detect
 
-# def detect_delimiter(file): 
+# def detect_delimiter(file):
 #     with open(file) as myfile:
 #         firstline = myfile.readline()
 #     myfile.close()
 #     deliminter = detect(firstline)
 
 #     return deliminter
+
 
 def latex_table(filepath, table, caption):
     """
@@ -20,11 +22,17 @@ def latex_table(filepath, table, caption):
     Args:
         filepath (str): path to file
         table (pd.DataFrame): table to convert
-        caption (str): caption for table 
+        caption (str): caption for table
     """
     with open(filepath, "w") as f:
         f.write(
-            table.to_latex(index=False, position="h!", caption=caption, bold_rows=True, escape=False)
+            table.to_latex(
+                index=False,
+                position="h!",
+                caption=caption,
+                bold_rows=True,
+                escape=False,
+            )
         )
 
 
@@ -40,7 +48,7 @@ def round_to_nearest(x, base=50):
         float: rounded value
     """
     try:
-        return base * round(x/base)
+        return base * round(x / base)
     # if base - x % base <= 10:
     #     return base * math.ceil(x / base) + base
     # try:

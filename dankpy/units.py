@@ -53,10 +53,11 @@ def c2f(c):
     """
     return (c * 9 / 5) + 32
 
+
 def c2k(c):
     """Converts Celcius to Kelvin
 
-    :param c: Celcius 
+    :param c: Celcius
     :type c: float
     :return: Kelvin
     :rtype: float
@@ -64,10 +65,11 @@ def c2k(c):
 
     return c + 273.15
 
+
 def k2c(c):
     """Converts Kelvin to Celcius
 
-    :param k: Kelvin 
+    :param k: Kelvin
     :type k: float
     :return: Celcius
     :rtype: float

@@ -108,6 +108,7 @@ class graph(go.Figure):
     """
     Custom Plotly figure object
     """
+
     zoom = None
 
     def __init__(self, *args, **kw):
@@ -154,7 +155,7 @@ class graph(go.Figure):
 
     def save_latex(self, name, keep_ticks=False):
         """
-        Save figure for LaTeX PDF. 
+        Save figure for LaTeX PDF.
 
         Args:
             name (str): name of the file

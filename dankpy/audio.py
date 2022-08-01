@@ -15,10 +15,11 @@ from pydub import AudioSegment
 
 valid_audio = ["wav", "flac", "mp3", "ogg", "aiff", "au"]
 
+
 def spectrogram(
     data,
     sample_rate,
-    window_size= 8192,
+    window_size=8192,
     nfft=4096,
     noverlap=4096,
     nperseg=8192,
@@ -91,8 +92,7 @@ def spectrograph(
     :rtype: plotly.go figure
     """
     if correction == None:
-        correction = 0 
-
+        correction = 0
 
     fig = graph()
     fig.add_trace(
@@ -142,6 +142,7 @@ def write_audio(data, filepath, sample_rate):
 #         librosa.amplitude_to_db(out, ref=np.max), ax=ax, y_axis="log", x_axis="time"
 #     )
 #     fig.savefig(filepath + ".png")
+
 
 def mp3towav(file, output, output_format="wav"):
     """Converts mp3 to wav

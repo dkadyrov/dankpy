@@ -83,33 +83,43 @@ def absorption(f, t=20, rh=60, ps=ps0):
 
 
 def a_weighted(f):
-    return 1.2588966*(12200**2.*f**4)/((f**2+20.6**2)*np.sqrt((f**2+107.7**2)*(f**2+737.9**2))*(f**2+12200**2))
+    return (
+        1.2588966
+        * (12200**2.0 * f**4)
+        / (
+            (f**2 + 20.6**2)
+            * np.sqrt((f**2 + 107.7**2) * (f**2 + 737.9**2))
+            * (f**2 + 12200**2)
+        )
+    )
+
 
 def decibel(x, u=None, r=None):
     if u is None and r is None:
         u = "power"
         x = abs(x) ** 2
     else:
-        if u is None and isinstance(r, str): 
+        if u is None and isinstance(r, str):
             r = u
             u = "voltage"
-        else: 
+        else:
             r = 1
-    
-    if u not in ["power", "voltage"]: 
+
+    if u not in ["power", "voltage"]:
         raise "u must be power or voltage"
     if u == "voltage":
         x = abs(x) ** 2 / r
 
-    return (10 * np.log10(x) + 300) - 300 
+    return (10 * np.log10(x) + 300) - 300
+
 
 def integrate_PSD_db(frequency, signal, f_low, f_high):
     data = pd.DataFrame({"frequency": frequency, "signal": signal})
 
     filt = data[(data.frequency <= f_high) & (data.frequency >= f_low)]
 
-    return 10 * np.log10(sum(10 ** (filt.signal/10)) * data.
-    frequency.iloc[1])
+    return 10 * np.log10(sum(10 ** (filt.signal / 10)) * data.frequency.iloc[1])
+
 
 # def integrate_PSD2D_db(data, f_low, f_high):
 #     filt = data[(data.frequency <= f_high) & (data.frequency >= f_low)]
@@ -118,58 +128,87 @@ def integrate_PSD_db(frequency, signal, f_low, f_high):
 
 
 def integrate_a_weighted(f, x):
-    return decibel(sum(10**(x/10) * (a_weighted(f)**2) * f[1]), "power")
+    return decibel(sum(10 ** (x / 10) * (a_weighted(f) ** 2) * f[1]), "power")
+
 
 from scipy.signal import medfilt
 
+
 def integrate_a_weighted_medfilt(f, x):
-    return decibel( sum( 10**(medfilt(x,49)/10) * (a_weighted(f)**2) * f[1]),'power' )
- 
-def atmospheric_attenuation(Tin,Psin,hrin,dist,f):
-    T = Tin + 273.15 #temp input in K
-    To1 = 273.15 # triple point in K
-    To = 293.15 # ref temp in K
+    return decibel(
+        sum(10 ** (medfilt(x, 49) / 10) * (a_weighted(f) ** 2) * f[1]), "power"
+    )
 
-    Ps = Psin/29.9212598 # static pressure in atm
-    Pso = 1 # reference static pressure
 
-    F = f/Ps # frequency per atm
+def atmospheric_attenuation(Tin, Psin, hrin, dist, f):
+    T = Tin + 273.15  # temp input in K
+    To1 = 273.15  # triple point in K
+    To = 293.15  # ref temp in K
 
+    Ps = Psin / 29.9212598  # static pressure in atm
+    Pso = 1  # reference static pressure
+
+    F = f / Ps  # frequency per atm
 
     # calculate saturation pressure
-    Psat = 10**(10.79586*(1-(To1/T))-5.02808*np.log10(T/To1)+1.50474e-4*(1-10**(-8.29692*((T/To1)-1)))-4.2873e-4*(1-10**(-4.76955*((To1/T)-1)))-2.2195983)
+    Psat = 10 ** (
+        10.79586 * (1 - (To1 / T))
+        - 5.02808 * np.log10(T / To1)
+        + 1.50474e-4 * (1 - 10 ** (-8.29692 * ((T / To1) - 1)))
+        - 4.2873e-4 * (1 - 10 ** (-4.76955 * ((To1 / T) - 1)))
+        - 2.2195983
+    )
 
-    h = hrin*Psat/Ps # calculate the absolute humidity 
+    h = hrin * Psat / Ps  # calculate the absolute humidity
 
     # Scaled relaxation frequency for Nitrogen
-    FrN = (To/T)**(1/2)*(9+280*h*np.exp(-4.17*((To/T)**(1/3)-1)));
+    FrN = (To / T) ** (1 / 2) * (
+        9 + 280 * h * np.exp(-4.17 * ((To / T) ** (1 / 3) - 1))
+    )
 
     # scaled relaxation frequency for Oxygen
-    FrO = (24+4.04e4*h*(.02+h)/(.391+h));
+    FrO = 24 + 4.04e4 * h * (0.02 + h) / (0.391 + h)
 
     # attenuation coefficient in nepers/m
-    alpha = Ps*F**2*(1.84e-11*(T/To)**(1/2) + (T/To)**(-5/2)*(1.275e-2*np.exp(-2239.1/T)/(FrO+F**2/FrO) + 1.068e-1*np.exp(-3352/T)/(FrN+F**2/FrN)))
+    alpha = (
+        Ps
+        * F**2
+        * (
+            1.84e-11 * (T / To) ** (1 / 2)
+            + (T / To) ** (-5 / 2)
+            * (
+                1.275e-2 * np.exp(-2239.1 / T) / (FrO + F**2 / FrO)
+                + 1.068e-1 * np.exp(-3352 / T) / (FrN + F**2 / FrN)
+            )
+        )
+    )
 
-    a = 10*np.log10(np.exp(2*alpha))*dist
+    a = 10 * np.log10(np.exp(2 * alpha)) * dist
 
     return a
 
+
 def ground_effect(c, hr, hs, hrange, f, sigmae):
-    range1 = np.hypot(hr-hs, hrange)
-    range2 = np.hypot(hr+hs, hrange)
+    range1 = np.hypot(hr - hs, hrange)
+    range2 = np.hypot(hr + hs, hrange)
 
     l = c / f
-    
-    theta = np.arctan2(hrange, hr+hs)
 
-    Z = 1 + 0.0511*(1*f/sigmae)**(-0.75) + 1*1j*0.0768*(1*f/sigmae)**(-0.73)
-    R_p = (Z*np.sin(theta)-1 )/(Z*np.sin(theta)+1);
-    F = .1 
-    Q = R_p  + (1-R_p )*F
-    C =1
-    Rf = -np.sqrt(C)*abs(Q)+np.sqrt(1+abs(Q)**2+2.*abs(Q)*C)
-    pp = Rf*np.exp(1j*2*np.pi*range1/l)+np.sqrt(C)*Q*np.exp(1j*2*np.pi*range2/l);
+    theta = np.arctan2(hrange, hr + hs)
 
+    Z = (
+        1
+        + 0.0511 * (1 * f / sigmae) ** (-0.75)
+        + 1 * 1j * 0.0768 * (1 * f / sigmae) ** (-0.73)
+    )
+    R_p = (Z * np.sin(theta) - 1) / (Z * np.sin(theta) + 1)
+    F = 0.1
+    Q = R_p + (1 - R_p) * F
+    C = 1
+    Rf = -np.sqrt(C) * abs(Q) + np.sqrt(1 + abs(Q) ** 2 + 2.0 * abs(Q) * C)
+    pp = Rf * np.exp(1j * 2 * np.pi * range1 / l) + np.sqrt(C) * Q * np.exp(
+        1j * 2 * np.pi * range2 / l
+    )
 
     amp = decibel(abs(pp))
     amp = amp.replace(np.nan, 0)
