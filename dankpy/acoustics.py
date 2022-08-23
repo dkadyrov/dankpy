@@ -215,3 +215,4 @@ def ground_effect(c, hr, hs, hrange, f, sigmae):
     # amp(isnan(amp))=0
 
     return amp
+

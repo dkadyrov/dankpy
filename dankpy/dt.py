@@ -16,8 +16,14 @@ def read_datetime(string):
     try:
         dt = datetime.strptime(string, "%Y_%m_%d")
     except:
-        dt = parser.parse(string)
-
+        try:
+            dt = datetime.strptime(string, "%Y_%m_%d_%H_%M_%S.%f")
+        except: 
+            try: 
+                dt = datetime.strptime(string, "%Y_%m_%d_%H_%M_%S")
+            except:
+                dt = parser.parse(string)
+                
     return dt
 
 

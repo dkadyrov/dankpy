@@ -12,7 +12,10 @@ Place your terminal/command prompt into the downloaded folder and enter the foll
 pip install . 
 ```
 
-## Example of Graph Function
+
+## Examples
+
+### Example of Graph Function
 
 ```python
 from dankpy.graph import graph 
