@@ -14,7 +14,7 @@ import librosa
 import librosa.display
 from pydub import AudioSegment
 from copy import deepcopy
-import os 
+import os
 
 valid_audio = ["wav", "flac", "mp3", "ogg", "aiff", "au"]
 
@@ -28,13 +28,13 @@ class audiofile(object):
 
         self.data = pd.DataFrame()
 
-        if isinstance(start, datetime): 
+        if isinstance(start, datetime):
             self.start = start
-        else: 
+        else:
             if start == None:
-                try: 
+                try:
                     self.start = dt.read_datetime(self.filename[:23])
-                except: 
+                except:
                     self.start = dt.read_datetime("00:00:00")
                 # self.start = dt.read_datetime(start)
             else:
@@ -73,25 +73,46 @@ class audiofile(object):
 
     def spectrogram(self, window_size=8192, nfft=4096, noverlap=4096, nperseg=8192):
         time, frequency, Pxx = spectrogram(
-            self.data.signal, self.sample_rate, window_size=window_size, nfft=nfft, noverlap=noverlap, nperseg=nperseg, start=self.start, end=self.end
+            self.data.signal,
+            self.sample_rate,
+            window_size=window_size,
+            nfft=nfft,
+            noverlap=noverlap,
+            nperseg=nperseg,
+            start=self.start,
+            end=self.end,
         )
 
         return time, frequency, Pxx
 
-    def spectrograph(self, window_size=8192, nfft=4096, noverlap=4096, nperseg=8192):
+    def spectrograph(
+        self,
+        window_size=8192,
+        nfft=4096,
+        noverlap=4096,
+        nperseg=8192,
+        zmin=None,
+        zmax=None,
+        correction=0
+    ):
 
-        time, frequency, Pxx = self.spectrogram(window_size=window_size, nfft=nfft, noverlap=noverlap, nperseg=nperseg)
+        time, frequency, Pxx = self.spectrogram(
+            window_size=window_size, nfft=nfft, noverlap=noverlap, nperseg=nperseg
+        )
 
         fig = spectrograph(
             time,
             frequency,
             Pxx,
             colorscale="Jet",
+            zmin=zmin,
+            zmax=zmax,
+            correction=correction
         )
 
         return fig
 
-    def signal(self): 
+    def signal(self):
 
         fig = graph.graph()
         fig.add_trace(
@@ -109,9 +130,13 @@ class audiofile(object):
         return fig
 
     def psd(self, window_size=4096):
-        frequency, power = psd(self.data.signal, self.sample_rate, window_size=window_size)
+        frequency, power = psd(
+            self.data.signal, self.sample_rate, window_size=window_size
+        )
 
         return frequency, power
+
+
 # def audio_file(filepath, start, end):
 
 
@@ -250,7 +275,7 @@ def mp3towav(file, output, output_format="wav"):
     sound.export(output, format=output_format)
 
 
-def psd(x, sample_rate, window_size = 4096):
+def psd(x, sample_rate, window_size=4096):
     """
     Compute the power spectral density of a signal.
 
@@ -263,12 +288,12 @@ def psd(x, sample_rate, window_size = 4096):
         _type_: power spectral density
     """
 
-    f = fft.fft(x)
-    f1 = f[0:int(window_size/2)]
-    pf1 = 2*abs(f1*conj(f1))/(sample_rate*window_size)
+    f = fft.rfft(x)
+    f1 = f[0 : int(window_size / 2)]
+    pf1 = 2 * abs(f1 * conj(f1)) / (sample_rate * window_size)
     lpf1 = 10 * log10(pf1)
-    w = arange(1, window_size/2+1)
-    lp = lpf1[1:int(window_size/2)]
+    w = arange(1, window_size / 2 + 1)
+    lp = lpf1[1 : int(window_size / 2)]
     w1 = sample_rate * w / window_size
 
     return w1, lp
