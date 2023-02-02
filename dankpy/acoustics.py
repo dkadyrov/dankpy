@@ -1,12 +1,9 @@
-#%%
-from starpy.utilities.PyOctaveBand.PyOctaveBand import *
-
-# %%
-from numpy import pi, polymul
-from scipy.signal import bilinear
 import math
 import numpy as np
 import pandas as pd
+from numpy import pi, polymul
+from scipy.signal import medfilt
+from scipy.signal import bilinear
 
 
 def A_weighting(fs):
@@ -83,6 +80,13 @@ def absorption(f, t=20, rh=60, ps=ps0):
 
 
 def a_weighted(f):
+    """
+    Converts frequency into A-weighted decibels
+
+    :param f: _description_
+    :return: _description_
+    """
+
     return (
         1.2588966
         * (12200**2.0 * f**4)
@@ -95,6 +99,15 @@ def a_weighted(f):
 
 
 def decibel(x, u=None, r=None):
+    """
+    Converts a value to decibels
+
+    :param x: _description_
+    :param u: _description_, defaults to None
+    :param r: _description_, defaults to None
+    :return: _description_
+    """
+
     if u is None and r is None:
         u = "power"
         x = abs(x) ** 2
@@ -128,11 +141,17 @@ def integrate_PSD_db(frequency, signal, f_low, f_high):
 
 
 def integrate_a_weighted(f, x):
+    """
+    _summary_
+
+    :param f: _description_
+    :type f: _type_
+    :param x: _description_
+    :type x: _type_
+    :return: _description_
+    :rtype: _type_
+    """
     return decibel(sum(10 ** (x / 10) * (a_weighted(f) ** 2) * f[1]), "power")
-
-
-from scipy.signal import medfilt
-
 
 def integrate_a_weighted_medfilt(f, x):
     return decibel(
@@ -215,4 +234,3 @@ def ground_effect(c, hr, hs, hrange, f, sigmae):
     # amp(isnan(amp))=0
 
     return amp
-

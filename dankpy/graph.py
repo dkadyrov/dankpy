@@ -5,8 +5,7 @@ import plotly
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.io as pio
-
-mapbox_access_token = "pk.eyJ1IjoiZGthZHlyb3YiLCJhIjoiY2t5Y2kzZW1uMDgxNzMxbjM0YWVoeGhpYSJ9.dBAYii97EtyfHVFVUYLPeg"
+from config import mapbox_access_token
 
 colors = [
     "#1f77b4",  # muted blue
@@ -22,7 +21,7 @@ colors = [
 ]
 
 
-def get_continuous_color(colorscale, intermed):
+def get_continuous_color(colorscale: list, intermed: list) -> str:
     """
     Plotly continuous colorscales assign colors to the range [0, 1]. This function computes the intermediate color for any value in that range. Plotly doesn't make the colorscales directly accessible in a common format.
     Some are ready to use:
@@ -66,7 +65,7 @@ def get_continuous_color(colorscale, intermed):
     )
 
 
-def set_size(width, fraction=1, subplots=(1, 1)):
+def set_size(width: int, fraction=1, subplots=(1, 1)) -> tuple:
     """
     Set figure dimensions to avoid scaling in LaTeX.
 
@@ -153,7 +152,7 @@ class graph(go.Figure):
             ),
         )
 
-    def save_latex(self, name, keep_ticks=False):
+    def save_pdf(self, name: str, keep_ticks=False):
         """
         Save figure for LaTeX PDF.
 
@@ -194,7 +193,7 @@ class graph(go.Figure):
 
     def save_image(
         self,
-        name,
+        name: str,
         dpi=300,
         height=None,
         width=None,
@@ -236,7 +235,7 @@ class graph(go.Figure):
 
         self.write_image(f"{name}", scale=scale)
 
-    def save_html(self, name):
+    def save_html(self, name: str):
         """
         Save figure as HTML.
 
@@ -245,7 +244,7 @@ class graph(go.Figure):
         """
         self.write_html(f"{name}")
 
-    def export_html(self):
+    def to_html(self) -> str:
         """
         Export figure as HTML.
 
@@ -254,7 +253,7 @@ class graph(go.Figure):
         """
         return self.to_html(full_html=False)
 
-    def to_bytes(self):
+    def to_bytes(self) -> bytes:
         """
         Export figure as bytes.
 
@@ -263,7 +262,7 @@ class graph(go.Figure):
         """
         return io.BytesIO(self.to_image(format="png"))
 
-    def to_base64(self, dpi=120, keep_ticks=False):
+    def to_base64(self, dpi=120, keep_ticks=False) -> str:
         """
         Export figure as base64.
 

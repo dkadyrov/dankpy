@@ -21,7 +21,8 @@ setup(
         "soundfile",
         "scipy",
         "simplekml",
-        "planar",
         "lxml",
+        "pydub",
+        "xlrd"
     ],
 )

@@ -20,6 +20,14 @@ valid_audio = ["wav", "flac", "mp3", "ogg", "aiff", "au"]
 
 
 class audiofile(object):
+    """
+    _summary_
+
+    Args:
+        object (_type_): _description_
+    """
+
+
     def __init__(self, filepath, start=None):
         self.filepath = filepath
         self.filename = os.path.basename(filepath)

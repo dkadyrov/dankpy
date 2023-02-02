@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def distance(x1, y1, x2, y2):
+def distance(x1:float, y1:float, x2:float, y2:float) -> float:
     """
     Calculates distance between two points
 
@@ -12,12 +12,12 @@ def distance(x1, y1, x2, y2):
         y2 (float): y coordinate of point 2
 
     Returns:
-        _type_: _description_
+        _type_: distance between two points
     """
     return np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 
-def circle_intersection(x0, y0, r0, x1, y1, r1, x2=None, y2=None, r2=None):
+def circle_intersection(x0:float, y0:float, r0:float, x1:float, y1:float, r1:float, x2=None, y2=None, r2=None) -> list:
     """
     Calculates intersection of two or three circles
 
@@ -33,7 +33,7 @@ def circle_intersection(x0, y0, r0, x1, y1, r1, x2=None, y2=None, r2=None):
         r2 (_type_, optional): radius of circle 3. Defaults to None.
 
     Returns:
-        array: array of intersection points
+        list: list of intersection points
     """
 
     epsilon = 0.0000000000001

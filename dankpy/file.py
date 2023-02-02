@@ -1,11 +1,17 @@
-import os 
-import pathlib
-from datetime import datetime 
+import os
+from datetime import datetime
 
-def metadata(filepath):
+def metadata(filepath: str) -> dict:
     """
-    Returns metadata for a file.
+    Generates metadata of file
+
+    Args:
+        filepath (str): filepath of file
+
+    Returns:
+        dict: metadata of file
     """
+
     metadata = {}
     metadata["filepath"] = filepath
     metadata["filename"] = os.path.basename(filepath)

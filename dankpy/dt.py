@@ -3,7 +3,7 @@ import dateutil.parser as parser
 from datetime import datetime, timedelta
 
 
-def read_datetime(string):
+def read_datetime(string: str) -> datetime:
     """
     Reads and converts datetime
 
@@ -27,7 +27,7 @@ def read_datetime(string):
     return dt
 
 
-def read_matlab_date(date):
+def read_matlab_date(date: str) -> datetime:
     """
     Converts matlab date to datetime
 
@@ -42,7 +42,7 @@ def read_matlab_date(date):
     )
 
 
-def read_excel_date(date):
+def read_excel_date(date: float) -> datetime:
     """
     Converts excel date to datetime
 

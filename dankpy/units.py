@@ -1,4 +1,4 @@
-def meters2feet(m):
+def meters_2_feet(m: float) -> float:
     """
     Converts Meters to Feet
 
@@ -12,7 +12,7 @@ def meters2feet(m):
     return 3.28084 * m
 
 
-def feet2meters(ft):
+def feet_2_meters(ft: float) -> float:
     """
     Converts Feet to Meters
 
@@ -26,7 +26,7 @@ def feet2meters(ft):
     return ft / 3.28084
 
 
-def f2c(f):
+def fahrenheight_2_celcius(f: float) -> float:
     """
     Converts Fahrenheight to Celcius
 
@@ -40,7 +40,7 @@ def f2c(f):
     return (f - 32) * 5 / 9
 
 
-def c2f(c):
+def celcius_2_fahrenheight(c: float) -> float:
     """
     Converts Celcius to Fahrenheight
 
@@ -54,25 +54,29 @@ def c2f(c):
     return (c * 9 / 5) + 32
 
 
-def c2k(c):
-    """Converts Celcius to Kelvin
+def celcius_2_kelvin(c: float) -> float:
+    """
+    Converts Celcius to Kelvin
 
-    :param c: Celcius
-    :type c: float
-    :return: Kelvin
-    :rtype: float
+    Args:
+        c (float): Celcius
+
+    Returns:
+        float: Kelvin
+    """    
+
+    return c - 273.15
+
+
+def kelvin_2_celcius(k: float) -> float:
+    """
+    Converts Kelvin to Celcius
+
+    Args:
+        k (float): Kelvin
+
+    Returns:
+        float: Celcius
     """
 
-    return c + 273.15
-
-
-def k2c(c):
-    """Converts Kelvin to Celcius
-
-    :param k: Kelvin
-    :type k: float
-    :return: Celcius
-    :rtype: float
-    """
-
-    return c + 273.15
+    return k + 273.15
