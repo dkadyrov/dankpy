@@ -79,6 +79,18 @@ class audiofile(object):
 
         return sample
 
+    def resample(self, sample_rate: int) -> None:
+
+        self.audio = librosa.resample(self.audio, self.sample_rate, sample_rate)
+        self.sample_rate = sample_rate
+        self.data = pd.DataFrame()
+        self.end = self.start + timedelta(seconds=len(self.audio) / self.sample_rate)
+
+        self.data["datetime"] = pd.date_range(
+            start=self.start, end=self.end, periods=len(self.audio)
+        )        
+        self.data["signal"] = self.audio
+
     def spectrogram(self, window_size=8192, nfft=4096, noverlap=4096, nperseg=8192):
         time, frequency, Pxx = spectrogram(
             self.data.signal,

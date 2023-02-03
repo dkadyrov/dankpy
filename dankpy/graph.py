@@ -5,7 +5,7 @@ import plotly
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.io as pio
-from config import mapbox_access_token
+# from config import mapbox_access_token
 
 colors = [
     "#1f77b4",  # muted blue
@@ -102,7 +102,6 @@ def set_size(width: int, fraction=1, subplots=(1, 1)) -> tuple:
 
     return (fig_width_in, fig_height_in)
 
-
 class graph(go.Figure):
     """
     Custom Plotly figure object
@@ -112,7 +111,7 @@ class graph(go.Figure):
 
     def __init__(self, *args, **kw):
         super(graph, self).__init__(*args, **kw)
-        pio.full_figure_for_development(self, warn=False)
+        # pio.full_figure_for_development(self, warn=False)
         # self = go.Figure()
         self.update_layout(
             font_family="Arial",
@@ -190,6 +189,7 @@ class graph(go.Figure):
             margin_r=5,
         )
         pio.write_image(self, name, width=1.5 * 300, height=0.75 * 300)
+        # self.write_image(name, width=1.5*300, height=0.75*300)
 
     def save_image(
         self,

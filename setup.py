@@ -4,7 +4,7 @@ setup(
     name="dankpy",
     version="0.0.1",
     author="Daniel Kadyrov",
-    author_email="dkadyrov@stevens.edu",
+    author_email="daniel.kadyrov@gmail.com",
     packages=find_packages(),
     license="LICENSE.txt",
     description="DANKPY is a set of functions and utilities built and used by Daniel Kadyrov",
@@ -23,6 +23,8 @@ setup(
         "simplekml",
         "lxml",
         "pydub",
-        "xlrd"
+        "xlrd",
+        "kaleido==0.1.0post1",
+        "ffmpeg"
     ],
 )
