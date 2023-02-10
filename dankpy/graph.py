@@ -102,7 +102,7 @@ def set_size(width: int, fraction=1, subplots=(1, 1)) -> tuple:
 
     return (fig_width_in, fig_height_in)
 
-class graph(go.Figure):
+class Graph(go.Figure):
     """
     Custom Plotly figure object
     """
@@ -110,7 +110,7 @@ class graph(go.Figure):
     zoom = None
 
     def __init__(self, *args, **kw):
-        super(graph, self).__init__(*args, **kw)
+        super(Graph, self).__init__(*args, **kw)
         # pio.full_figure_for_development(self, warn=False)
         # self = go.Figure()
         self.update_layout(
@@ -188,17 +188,18 @@ class graph(go.Figure):
             margin_b=5,
             margin_r=5,
         )
+        
         pio.write_image(self, name, width=1.5 * 300, height=0.75 * 300)
         # self.write_image(name, width=1.5*300, height=0.75*300)
 
     def save_image(
         self,
         name: str,
-        dpi=300,
-        height=None,
-        width=None,
-        scale=3,
-    ):
+        dpi:int=300,
+        height:float=None,
+        width:float=None,
+        scale:int=3,
+    ) -> None:
         """
         Save figure as image.
 
@@ -235,7 +236,7 @@ class graph(go.Figure):
 
         self.write_image(f"{name}", scale=scale)
 
-    def save_html(self, name: str):
+    def save_html(self, name: str) -> None:
         """
         Save figure as HTML.
 

@@ -18,8 +18,7 @@ import os
 
 valid_audio = ["wav", "flac", "mp3", "ogg", "aiff", "au"]
 
-
-class audiofile(object):
+class Audio(object):
     """
     _summary_
 
@@ -27,12 +26,12 @@ class audiofile(object):
         object (_type_): _description_
     """
 
-
     def __init__(self, filepath, start=None):
         self.filepath = filepath
         self.filename = os.path.basename(filepath)
         self.audio, self.sample_rate = librosa.load(filepath)
         self.duration = librosa.get_duration(filename=self.filepath)
+        self.length = self.duration
 
         self.data = pd.DataFrame()
 
@@ -76,22 +75,52 @@ class audiofile(object):
         ]
         sample.start = start
         sample.end = end
-
+        sample.audio = sample.data.signal.values
+        sample.length = len(sample.audio) / sample.sample_rate
+        sample.duration = sample.length
         return sample
 
     def resample(self, sample_rate: int) -> None:
+        """
+        Resamples audio to sample rate
 
-        self.audio = librosa.resample(self.audio, self.sample_rate, sample_rate)
+        Args:
+            sample_rate (int): Sample rate to resample audio to
+        """
+
+
+        self.audio = librosa.resample(
+            self.audio, orig_sr=self.sample_rate, target_sr=sample_rate
+        )
         self.sample_rate = sample_rate
         self.data = pd.DataFrame()
         self.end = self.start + timedelta(seconds=len(self.audio) / self.sample_rate)
 
         self.data["datetime"] = pd.date_range(
             start=self.start, end=self.end, periods=len(self.audio)
-        )        
+        )
         self.data["signal"] = self.audio
 
-    def spectrogram(self, window_size=8192, nfft=4096, noverlap=4096, nperseg=8192):
+    def spectrogram(
+        self,
+        window_size: int = 8192,
+        nfft: int = 4096,
+        noverlap: int = 4096,
+        nperseg: int = 8192,
+    ) -> tuple:
+        """
+        Generates spectrogram of audio
+
+        Args:
+            window_size (int, optional): Window size. Defaults to 8192.
+            nfft (int, optional): Number for FFT. Defaults to 4096.
+            noverlap (int, optional): Sample overlap. Defaults to 4096.
+            nperseg (int, optional): Number of Samples. Defaults to 8192.
+
+        Returns:
+            tuple: time, frequency, Pxx
+        """
+
         time, frequency, Pxx = spectrogram(
             self.data.signal,
             self.sample_rate,
@@ -107,14 +136,14 @@ class audiofile(object):
 
     def spectrograph(
         self,
-        window_size=8192,
-        nfft=4096,
-        noverlap=4096,
-        nperseg=8192,
-        zmin=None,
-        zmax=None,
-        correction=0
-    ):
+        window_size: int = 8192,
+        nfft: int = 4096,
+        noverlap: int = 4096,
+        nperseg: int = 8192,
+        zmin: int = None,
+        zmax: int = None,
+        correction: int = 0,
+    ) -> graph.Graph:
 
         time, frequency, Pxx = self.spectrogram(
             window_size=window_size, nfft=nfft, noverlap=noverlap, nperseg=nperseg
@@ -127,14 +156,14 @@ class audiofile(object):
             colorscale="Jet",
             zmin=zmin,
             zmax=zmax,
-            correction=correction
+            correction=correction,
         )
 
         return fig
 
-    def signal(self):
+    def signal(self) -> graph.Graph:
 
-        fig = graph.graph()
+        fig = graph.Graph()
         fig.add_trace(
             go.Scatter(
                 x=self.data.datetime,
@@ -149,27 +178,32 @@ class audiofile(object):
 
         return fig
 
-    def psd(self, window_size=4096):
+    def psd(self, window_size: int = 4096) -> tuple:
+        """
+        Generates the power spectral density of the audio
+
+        Args:
+            window_size (int, optional): Sample window size. Defaults to 4096.
+
+        Returns:
+            tuple: frequency, power
+        """
         frequency, power = psd(
             self.data.signal, self.sample_rate, window_size=window_size
         )
 
         return frequency, power
 
-
-# def audio_file(filepath, start, end):
-
-
 def spectrogram(
-    data,
-    sample_rate,
-    window_size=8192,
-    nfft=4096,
-    noverlap=4096,
-    nperseg=8192,
-    start=None,
-    end=None,
-):
+    data: list or pd.Series,
+    sample_rate: int,
+    window_size: int = 8192,
+    nfft: int = 4096,
+    noverlap: int = 4096,
+    nperseg: int = 8192,
+    start: datetime = None,
+    end: datetime = None,
+) -> tuple:
     """Generates a spectrogram
 
     :param data: audio data
@@ -205,15 +239,15 @@ def spectrogram(
 
 
 def spectrograph(
-    time,
-    frequency,
-    Pxx,
-    colorscale="Jet",
-    zmin=None,
-    zmax=None,
-    correction=0,
-    save=None,
-):
+    time: list or pd.Series,
+    frequency: list or pd.Series,
+    Pxx: list or pd.Series,
+    colorscale: str = "Jet",
+    zmin: int = None,
+    zmax: int = None,
+    correction: int = 0,
+    save: str = None,
+) -> graph.Graph:
     """Generates spectrograph
 
     :param time: time
@@ -235,7 +269,7 @@ def spectrograph(
     :return: spectrograph
     :rtype: plotly.go figure
     """
-    fig = graph.graph()
+    fig = graph.Graph()
     fig.add_trace(
         go.Heatmap(
             x=time,
@@ -244,7 +278,8 @@ def spectrograph(
             colorscale=colorscale,
             showscale=False,
             zmin=zmin,
-            zmax=zmax
+            zmax=zmax,
+            zsmooth="best"
             # colorbar=dict(title="dB"),
         )
     )
@@ -256,7 +291,9 @@ def spectrograph(
     return fig
 
 
-def write_audio(data, filepath, sample_rate):
+def write_audio(
+    data: list or pd.Series, filepath: str, sample_rate: int
+) -> None:
     """Writes audiofile of data with set samplerate. Omit extension, will output only wav.
 
     :param data: data to output
@@ -285,7 +322,7 @@ def write_audio(data, filepath, sample_rate):
 #     fig.savefig(filepath + ".png")
 
 
-def mp3towav(file, output, output_format="wav"):
+def mp3towav(file: file, output: str, output_format: str = "wav") -> None:
     """Converts mp3 to wav
 
     :param filepath: filepath of mp3
@@ -295,7 +332,7 @@ def mp3towav(file, output, output_format="wav"):
     sound.export(output, format=output_format)
 
 
-def psd(x, sample_rate, window_size=4096):
+def psd(x: list or pd.Series, sample_rate: int, window_size: int = 4096) -> tuple:
     """
     Compute the power spectral density of a signal.
 

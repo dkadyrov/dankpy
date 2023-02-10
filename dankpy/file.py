@@ -1,6 +1,17 @@
 import os
 from datetime import datetime
 
+class File:
+    def init(self, filepath: str):
+        self.filepath = filepath
+        self.filename = os.path.basename(self.filepath)
+        self.extension = os.path.splitext(self.filepath)[1]
+        self.directory = os.path.dirname(self.filepath)
+        self.size = os.path.getsize(self.filepath)
+        self.modified = datetime.fromtimestamp(os.path.getmtime(self.filepath))
+        self.created = datetime.fromtimestamp(os.path.getctime(self.filepath))
+        self.accessed = datetime.fromtimestamp(os.path.getatime(self.filepath))        
+
 def metadata(filepath: str) -> dict:
     """
     Generates metadata of file

@@ -2,6 +2,21 @@ import xlrd
 import dateutil.parser as parser
 from datetime import datetime, timedelta
 
+class DT(datetime):
+    def __init__(self, *args, **kw):
+        super(DT, self).__init__(*args, **kw)
+
+    def write_time(self, milliseconds:bool=False) -> str:
+        if milliseconds:
+            return self.strftime("%H:%M:%S.%f")
+        else: 
+            return self.strftime("%H:%M:%S")
+
+    def write_date(self, seperator:str="-") -> str:
+        return self.strftime(f"%Y{seperator}%m{seperator}%d")
+    
+    def write_datetime(self, seperator:str="-", milliseconds:bool=False) -> str:
+        return self.strftime(f"%Y{seperator}%m{seperator}%d %H:%M:%S.%f")
 
 def read_datetime(string: str) -> datetime:
     """
@@ -69,3 +84,10 @@ def round_seconds(obj: datetime) -> datetime:
         obj += timedelta(seconds=1)
 
     return obj.replace(microsecond=0)
+
+def write_time(dt: datetime) -> str:
+    """
+    Writes time in HH:MM:SS format
+    """
+
+    return dt.strftime("%H:%M:%S")
