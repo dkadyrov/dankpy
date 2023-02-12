@@ -151,7 +151,7 @@ class Graph(go.Figure):
             ),
         )
 
-    def save_pdf(self, name: str, keep_tick:bool=False) -> None:
+    def save_pdf(self, name: str, keep_ticks:bool=False) -> None:
         """
         Save figure for LaTeX PDF.
 

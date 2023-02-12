@@ -48,7 +48,7 @@ def hex_to_rgb(hex: str) -> tuple:
 
     hex = hex.lstrip("#")
     lv = len(hex)
-    return tuple(int(value[i : i + lv // 3], 16) for i in range(0, lv, lv // 3))
+    return tuple(int(hex[i : i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
 
 def rgb_to_cmyk(r: int, g: int, b:int, cmyk_scale:int=100, rgb_scale:int=255) -> tuple:
