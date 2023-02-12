@@ -4,19 +4,70 @@ import numpy as np
 import pandas as pd
 
 
-def linear(x, a, b):
+def linear(x: float, a: float, b: float) -> float:
+    """
+    Linear function
+
+    Args:
+        x (float)
+        b (float)
+        a (float)
+
+    Returns:
+        float
+    """
+
     return a * x + b
 
 
-def exponential(x, a, b, c):
+def exponential(x: float, a: float, b: float, c: float) -> float:
+    """
+    Exponential function
+
+    Args:
+        x (float)
+        a (float)
+        b (float)
+        c (float)
+
+    Returns:
+        float
+    """
+
     return a * np.exp(b * (x - c))
 
 
-def quadratic(x, a, b, c):
+def quadratic(x: float, a: float, b: float, c: float) -> float:
+    """
+    Quadratic function
+
+    Args:
+        x (float)
+        a (float)
+        b (float)
+        c (float)
+
+    Returns:
+        float
+    """
+
     return a * (x**2.0) + b * x + c
 
 
-def logistic(x, x0, k, L=None):
+def logistic(x: float, x0: float, k: float, L: float = None) -> float:
+    """
+    Logistic function
+
+    Args:
+        x (float)
+        x0 (float)
+        k (float)
+        L (float, optional). Defaults to None.
+
+    Returns:
+        float
+    """
+
     if L == None:
         return 1 / (1 + np.exp(-k * (x0 - x)))
     else:
@@ -25,12 +76,35 @@ def logistic(x, x0, k, L=None):
         # return L / (1+np.exp(-(k*x+x0)))
 
 
-def gaussian(x, a, x0, sigma):
+def gaussian(x: float or list, a: float, x0: float, sigma: float) -> float or list:
+    """
+
+
+    Args:
+        x (float)
+        a (float)
+        x0 (float)
+        sigma (float)
+
+    Returns:
+        float or list
+    """
+
     return a * np.exp(-((x - x0) ** 2) / (2 * sigma**2))
 
 
-def exponential_model(x, y, x2):
+def exponential_model(x: list, y: list, x2: list) -> tuple:
+    """
+    Exponential model
 
+    Args:
+        x (list): x values for fit
+        y (list): y values for fit
+        x2 (list): x values for prediction
+
+    Returns:
+        tuple: y2, results
+    """
     params, corr = curve_fit(exponential, x, y, p0=[1, 0, 1], maxfev=5000)
 
     y2 = exponential(x2, *params)
@@ -42,7 +116,24 @@ def exponential_model(x, y, x2):
     return y2, results
 
 
-def logistic_model(x, y, x2, weights=None):
+def logistic_model(
+    x: list or pd.Series,
+    y: list or pd.Series,
+    x2: list or pd.Series,
+    weights: list or pd.Series = None,
+) -> tuple:
+    """
+    Logistic model
+
+    Args:
+        x (list or pd.Series): x values
+        y (list or pd.Series): y values
+        x2 (list or pd.Series): x values for prediction
+        weights (list or pd.Series, optional): weights for prediction. Defaults to None.
+
+    Returns:
+        tuple: y2, results
+    """
     ## scale = y[-1]
 
     df = pd.DataFrame()
@@ -73,7 +164,21 @@ def logistic_model(x, y, x2, weights=None):
     return y2, results
 
 
-def quadratic_model(x, y, x2):
+def quadratic_model(
+    x: list or pd.Series, y: list or pd.Series, x2: list or pd.Series
+) -> tuple:
+    """
+    Quadratic model
+
+    Args:
+        x (list or pd.Series): x values for fit
+        y (list or pd.Series): y values for fit
+        x2 (list or pd.Series): x values for prediction
+
+    Returns:
+        tuple: y2, results
+    """
+
     def quadratic(x, a, b, c):
         return a * (x**2.0) + b * x + c
 
@@ -88,7 +193,21 @@ def quadratic_model(x, y, x2):
     return y2, results
 
 
-def linear_model(x, y, x2):
+def linear_model(
+    x: list or pd.Series, y: list or pd.Series, x2: list or pd.Series
+) -> tuple:
+    """
+    Linear model
+
+    Args:
+        x (list or pd.Series): x values for fit
+        y (list or pd.Series): y values for fit
+        x2 (list or pd.Series): x values for prediction
+
+    Returns:
+        tuple: y2, results
+    """
+
     def linear(x, a, b):
         return a * x + b
 
@@ -103,7 +222,21 @@ def linear_model(x, y, x2):
     return y2, results
 
 
-def gaussian_model(x, y, x2):
+def gaussian_model(
+    x: list or pd.Series, y: list or pd.Series, x2: list or pd.Series
+) -> tuple:
+    """
+    Gaussian model
+
+    Args:
+        x (list or pd.Series): x values for fit
+        y (list or pd.Series): y values for fit
+        x2 (list or pd.Series): x values for prediction
+
+    Returns:
+        tuple: y2, results
+    """
+
     def gaussian(x, a, x0, sigma):
         return a * np.exp(-((x - x0) ** 2) / (2 * sigma**2))
 

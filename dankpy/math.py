@@ -12,7 +12,7 @@ def distance(x1:float, y1:float, x2:float, y2:float) -> float:
         y2 (float): y coordinate of point 2
 
     Returns:
-        _type_: distance between two points
+        float: distance between two points
     """
     return np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 

@@ -79,12 +79,15 @@ def absorption(f, t=20, rh=60, ps=ps0):
     return 20 * alpha / math.log(10)
 
 
-def a_weighted(f):
+def a_weighted(f: float) -> float:
     """
     Converts frequency into A-weighted decibels
 
-    :param f: _description_
-    :return: _description_
+    Args:
+        f (float): Frequency in Hz
+
+    Returns:
+        float: A-weighted decibels
     """
 
     return (
@@ -98,35 +101,45 @@ def a_weighted(f):
     )
 
 
-def decibel(x, u=None, r=None):
+def decibel(x: list, u: str = "power", r: float = 1) -> list:
     """
-    Converts a value to decibels
+    Converts a list of values into decibels. If the signal type is voltage, the resistance must be specified.
 
-    :param x: _description_
-    :param u: _description_, defaults to None
-    :param r: _description_, defaults to None
-    :return: _description_
+    Args:
+        x (list):
+        u (str, optional): Signal Type. specifies the signal type represented by the elements of x as either 'voltage' or 'power'. Defaults to power.
+        r (float, optional): The resistance for voltage measurements. Defaults to 1.
+
+    Returns:
+        list: Values in decibels
     """
-
-    if u is None and r is None:
-        u = "power"
-        x = abs(x) ** 2
-    else:
-        if u is None and isinstance(r, str):
-            r = u
-            u = "voltage"
-        else:
-            r = 1
 
     if u not in ["power", "voltage"]:
         raise "u must be power or voltage"
-    if u == "voltage":
+    elif u == "voltage":
         x = abs(x) ** 2 / r
+    elif u == "power" and r is None:
+        x = abs(x) ** 2
 
     return (10 * np.log10(x) + 300) - 300
 
 
-def integrate_PSD_db(frequency, signal, f_low, f_high):
+def integrate_PSD_db(
+    frequency: list or pd.Series, signal: list or pd.Series, f_low: float, f_high: float
+) -> list:
+    """
+    Integrates a power spectral density in decibels
+
+    Args:
+        frequency (list or pd.Series): Frequency in Hz
+        signal (list or pd.Series): Power spectral density in decibels
+        f_low (float): Low frequency cutoff
+        f_high (float): High frequency cutoff
+
+    Returns:
+        list: Integrated power spectral density in decibels
+    """
+
     data = pd.DataFrame({"frequency": frequency, "signal": signal})
 
     filt = data[(data.frequency <= f_high) & (data.frequency >= f_low)]
@@ -140,31 +153,57 @@ def integrate_PSD_db(frequency, signal, f_low, f_high):
 #     frequency.iloc[1])
 
 
-def integrate_a_weighted(f, x):
+def integrate_a_weighted(f: list, x: list) -> list:
     """
-    _summary_
+    Integrates an a-weighted power spectral density in decibels
 
-    :param f: _description_
-    :type f: _type_
-    :param x: _description_
-    :type x: _type_
-    :return: _description_
-    :rtype: _type_
+    Args:
+        f (list): Frequency in Hz
+        x (list): Power spectral density in decibels
+
+    Returns:
+        list: Integrated a-weighted power spectral density in decibels
     """
     return decibel(sum(10 ** (x / 10) * (a_weighted(f) ** 2) * f[1]), "power")
 
-def integrate_a_weighted_medfilt(f, x):
+
+def integrate_a_weighted_medfilt(f: list, x: list) -> list:
+    """
+    Integrates an a-weighted power spectral density in decibels with a median filter
+
+    Args:
+        f (list): Frequency in Hz
+        x (list): Power spectral density in decibels
+
+    Returns:
+        list: Integrated a-weighted power spectral density in decibels with a median filter
+    """
+
     return decibel(
         sum(10 ** (medfilt(x, 49) / 10) * (a_weighted(f) ** 2) * f[1]), "power"
     )
 
 
-def atmospheric_attenuation(Tin, Psin, hrin, dist, f):
-    T = Tin + 273.15  # temp input in K
+def atmospheric_attenuation(T: float, P: float, h: float, dist: float, f: list) -> list:
+    """
+    Calculates the atmospheric attenuation for a given temperature, pressure, altitude, distance, and frequency
+
+    Args:
+        T (float): Temperature in K
+        P (float): Pressure in Pa
+        h (float): Humidity in %
+        dist (float): Distance in m
+        f (list): Frequency in Hz
+
+    Returns:
+        list: Atmospheric attenuation in dB/m
+    """
+
+    T = T + 273.15  # temp input in K
     To1 = 273.15  # triple point in K
     To = 293.15  # ref temp in K
 
-    Ps = Psin / 29.9212598  # static pressure in atm
+    Ps = P / 29.9212598  # static pressure in atm
     Pso = 1  # reference static pressure
 
     F = f / Ps  # frequency per atm
@@ -178,7 +217,7 @@ def atmospheric_attenuation(Tin, Psin, hrin, dist, f):
         - 2.2195983
     )
 
-    h = hrin * Psat / Ps  # calculate the absolute humidity
+    h = h * Psat / Ps  # calculate the absolute humidity
 
     # Scaled relaxation frequency for Nitrogen
     FrN = (To / T) ** (1 / 2) * (
@@ -231,6 +270,5 @@ def ground_effect(c, hr, hs, hrange, f, sigmae):
 
     amp = decibel(abs(pp))
     amp = amp.replace(np.nan, 0)
-    # amp(isnan(amp))=0
 
     return amp

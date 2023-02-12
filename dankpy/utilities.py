@@ -1,21 +1,10 @@
-#%%
 import numpy as np
 from datetime import datetime, timedelta
 import math
 import pandas as pd
 
-# from detect_delimiter import detect
 
-# def detect_delimiter(file):
-#     with open(file) as myfile:
-#         firstline = myfile.readline()
-#     myfile.close()
-#     deliminter = detect(firstline)
-
-#     return deliminter
-
-
-def latex_table(filepath, table, caption):
+def latex_table(filepath: str, table: pd.DataFrame, caption: str) -> None:
     """
     Generates latex table from pandas Dataframe
 
@@ -36,7 +25,7 @@ def latex_table(filepath, table, caption):
         )
 
 
-def round_to_nearest(x, base=50):
+def round_to_nearest(x: float, base:int=50) -> float:
     """
     Rounds up or down to nearest base value
 
@@ -57,7 +46,7 @@ def round_to_nearest(x, base=50):
         print(x)
 
 
-def lower_keys(tree):
+def lower_keys(tree: dict) -> dict:
     """
     Normalizes a dictionary to have lowercase and snakecase keys
 
@@ -73,10 +62,11 @@ def lower_keys(tree):
             data[k.lower().replace(" ", "_")] = lower_keys(tree[k])
         else:
             data[k.lower().replace(" ", "_")] = tree[k]
+
     return data
 
 
-def list2pd(list_of_dicts):
+def list_to_pd(list_of_dicts: list) -> pd.DataFrame:
     """
     Converts a list of dictionaries to pandas Dataframe object with keys as columns
 
@@ -89,7 +79,7 @@ def list2pd(list_of_dicts):
     return pd.DataFrame(x.__dict__ for x in list_of_dicts)
 
 
-def pd2html(data):
+def pd_to_html(data: pd.DataFrame) -> str:
     """
     Outputs pandas Dataframe to HTML table
 

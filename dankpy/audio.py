@@ -18,12 +18,10 @@ import os
 
 valid_audio = ["wav", "flac", "mp3", "ogg", "aiff", "au"]
 
-class Audio(object):
-    """
-    _summary_
 
-    Args:
-        object (_type_): _description_
+class Audio:
+    """
+    Audio class for handling audio files
     """
 
     def __init__(self, filepath, start=None):
@@ -56,13 +54,30 @@ class Audio(object):
         self.metadata = file.metadata(self.filepath)
         self.data["signal"] = self.audio
 
-    def trim(self, start, end=None, length=None):
+    def trim(
+        self, start: datetime or str, end: datetime or str = None, length: float = None
+    ):
+        """
+        Trims audio to specified start and end times or length
+
+        Args:
+            start (datetime or str): Start time of audio
+            end (datetimeorstr, optional): End time of audio. Defaults to None.
+            length (float, optional): Length of audio sample in seconds. Defaults to None.
+
+        Returns:
+            audio.Audio: Trimmed audio sample
+        """
 
         if not isinstance(start, datetime):
             start = dt.read_datetime(start)
 
         if end == None:
             end = start + timedelta(seconds=length)
+        else:
+            if not isinstance(end, datetime):
+                end = dt.read_datetime(end)
+
         if length == None:
             length = (end - start).total_seconds()
 
@@ -78,6 +93,7 @@ class Audio(object):
         sample.audio = sample.data.signal.values
         sample.length = len(sample.audio) / sample.sample_rate
         sample.duration = sample.length
+
         return sample
 
     def resample(self, sample_rate: int) -> None:
@@ -87,7 +103,6 @@ class Audio(object):
         Args:
             sample_rate (int): Sample rate to resample audio to
         """
-
 
         self.audio = librosa.resample(
             self.audio, orig_sr=self.sample_rate, target_sr=sample_rate
@@ -144,6 +159,21 @@ class Audio(object):
         zmax: int = None,
         correction: int = 0,
     ) -> graph.Graph:
+        """
+        Generates spectrograph of audio
+
+        Args:
+            window_size (int, optional): Window size in samples. Defaults to 8192.
+            nfft (int, optional): FFT number. Defaults to 4096.
+            noverlap (int, optional): Overlap amount in samples. Defaults to 4096.
+            nperseg (int, optional): Number of samples per segment. Defaults to 8192.
+            zmin (int, optional): Minimum Z value for graph. Defaults to None.
+            zmax (int, optional): Maximum Z value for graph. Defaults to None.
+            correction (int, optional): dB correction. Defaults to 0.
+
+        Returns:
+            graph.Graph: Spectrograph
+        """
 
         time, frequency, Pxx = self.spectrogram(
             window_size=window_size, nfft=nfft, noverlap=noverlap, nperseg=nperseg
@@ -162,6 +192,12 @@ class Audio(object):
         return fig
 
     def signal(self) -> graph.Graph:
+        """
+        Generates signal graph
+
+        Returns:
+            graph.Graph: Signal graph
+        """
 
         fig = graph.Graph()
         fig.add_trace(
@@ -194,6 +230,7 @@ class Audio(object):
 
         return frequency, power
 
+
 def spectrogram(
     data: list or pd.Series,
     sample_rate: int,
@@ -204,22 +241,21 @@ def spectrogram(
     start: datetime = None,
     end: datetime = None,
 ) -> tuple:
-    """Generates a spectrogram
+    """
+    Generates spectrogram of audio
 
-    :param data: audio data
-    :type data: list or array
-    :param sample_rate: sampling rate of data
-    :type sample_rate: int or float
-    :param window_size: window size for hanning window, defaults to 2*8192
-    :type window_size: int or float, optional
-    :param noverlap: overlap, defaults to 1024/16
-    :type noverlap: int or float, optional
-    :param start: start time of audio data, defaults to None
-    :type start: Datetime, optional
-    :param end: end time of audio data, defaults to None
-    :type end: Datetime, optional
-    :return: output of spectrogram [time, freqs, Pxx]
-    :rtype: array
+    Args:
+        data (list or pd.Series): Data to generate spectrogram of
+        sample_rate (int): Sample rate of data
+        window_size (int, optional): Window size in samples. Defaults to 8192.
+        nfft (int, optional): FFT number. Defaults to 4096.
+        noverlap (int, optional): Overlap amount in samples. Defaults to 4096.
+        nperseg (int, optional): Number of samples per segment. Defaults to 8192.
+        start (datetime, optional): Start time. Defaults to None.
+        end (datetime, optional): End time. Defaults to None.
+
+    Returns:
+        tuple: time, frequency, Pxx
     """
 
     window = signal.windows.hann(window_size)
@@ -246,28 +282,20 @@ def spectrograph(
     zmin: int = None,
     zmax: int = None,
     correction: int = 0,
-    save: str = None,
 ) -> graph.Graph:
-    """Generates spectrograph
+    """
+    Generates spectrograph of audio
 
-    :param time: time
-    :type time: array
-    :param frequency: frequency array
-    :type frequency: array
-    :param Pxx: power
-    :type Pxx: array of arrays
-    :param colorscale: Heatmap colorscale. See plotly documentation, defaults to "Jet"
-    :type colorscale: str, optional
-    :param zmin: minimum cmap color scale, defaults to None
-    :type zmin: int, optional
-    :param zmax: maximum cmap color scale, defaults to None
-    :type zmax: int, optional
-    :param correction: magnitude, defaults to None
-    :type correction: int or float, optional
-    :param save: location to save file, defaults to None
-    :type save: str, optional
-    :return: spectrograph
-    :rtype: plotly.go figure
+    Args:
+        time (list or pd.Series): Time of spectrogram
+        frequency (list or pd.Series): Frequency of spectrogram
+        Pxx (list or pd.Series): Power of spectrogram
+        colorscale (str, optional): Colorscale of graph. Defaults to "Jet".
+        zmin (int, optional): Minimum Z value for graph. Defaults to None.
+        zmax (int, optional): Maximum Z value for graph. Defaults to None.
+        correction (int, optional): dB correction. Defaults to 0.
+    Returns:
+        graph.Graph: _description_
     """
     fig = graph.Graph()
     fig.add_trace(
@@ -280,55 +308,35 @@ def spectrograph(
             zmin=zmin,
             zmax=zmax,
             zsmooth="best"
-            # colorbar=dict(title="dB"),
         )
     )
     fig.update_layout(yaxis=dict(title="Frequency [Hz]"))
 
-    if save:
-        fig.save_image(save)
-
     return fig
 
 
-def write_audio(
-    data: list or pd.Series, filepath: str, sample_rate: int
-) -> None:
-    """Writes audiofile of data with set samplerate. Omit extension, will output only wav.
-
-    :param data: data to output
-    :type data: numpy.array
-    :param filepath: filepath of output
-    :type filepath: str
-    :param sample_rate: desired file sample rate
-    :type sample_rate: int
+def write_audio(data: list or pd.Series, filepath: str, sample_rate: int) -> None:
     """
+    Writes audiofile of data with set samplerate. Omit extension, will output only wav.
+
+    Args:
+        data (list or pd.Series): data to output
+        filepath (str): filepath of output
+        sample_rate (int): desired file sample rate
+    """
+
     sf.write(filepath + ".wav", data, sample_rate)
 
-
-# def write_spectrogram(filepath, data):
-#     window_size = 1024
-#     window = np.hanning(window_size)
-#     stft = librosa.core.spectrum.stft(
-#         np.array(data), n_fft=window_size, hop_length=512, window=window
-#     )
-#     out = 2 * abs(stft) / sum(window)
-#     fig = plt.Figure()
-#     canvas = FigureCanvas(fig)
-#     ax = fig.add_subplot(111)
-#     p = librosa.display.specshow(
-#         librosa.amplitude_to_db(out, ref=np.max), ax=ax, y_axis="log", x_axis="time"
-#     )
-#     fig.savefig(filepath + ".png")
-
-
-def mp3towav(file: file, output: str, output_format: str = "wav") -> None:
-    """Converts mp3 to wav
-
-    :param filepath: filepath of mp3
-    :type filepath: str
+def mp3_to_wav(input: str, output: str, output_format: str = "wav") -> None:
     """
-    sound = AudioSegment.from_mp3(file)
+    Converts mp3 file to wav file.
+
+    Args:
+        file (file): filepath of input
+        output (str): filepath of output
+        output_format (str, optional): Output format. Defaults to "wav".
+    """
+    sound = AudioSegment.from_mp3(input)
     sound.export(output, format=output_format)
 
 
@@ -338,11 +346,11 @@ def psd(x: list or pd.Series, sample_rate: int, window_size: int = 4096) -> tupl
 
     Args:
         x (array): signal
-        sample_rate (_type_): sample rate of the signal
+        sample_rate (int): sample rate of the signal
         sample_window (int, optional): length of the window to use for the FFT. Defaults to 4096.
 
     Returns:
-        _type_: power spectral density
+        tuple: power spectral density
     """
 
     f = fft.rfft(x)
