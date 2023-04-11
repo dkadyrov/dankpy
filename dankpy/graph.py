@@ -102,7 +102,7 @@ def set_size(width: int, fraction=1, subplots=(1, 1)) -> tuple:
 
     return (fig_width_in, fig_height_in)
 
-class Graph(go.Figure):
+class Figure(go.Figure):
     """
     Custom Plotly figure object
     """
@@ -110,7 +110,7 @@ class Graph(go.Figure):
     zoom = None
 
     def __init__(self, *args, **kw):
-        super(Graph, self).__init__(*args, **kw)
+        super(Figure, self).__init__(*args, **kw)
         # pio.full_figure_for_development(self, warn=False)
         # self = go.Figure()
         self.update_layout(

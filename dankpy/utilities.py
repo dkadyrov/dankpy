@@ -3,6 +3,17 @@ from datetime import datetime, timedelta
 import math
 import pandas as pd
 
+def pd_listfilter(df: pd.DataFrame,  filter: list, column=None) -> pd.DataFrame:
+    pattern = '|'.join(filter)
+
+    if column is None: 
+        df = df[df.apply(lambda r: r.str.contains(pattern, na=False).any(), axis=1)]
+    if isinstance(column, list): 
+        df = df[df[column].apply(lambda r: r.str.contains(pattern, na=False).any(), axis=1)]
+    elif isinstance(column, str): 
+        df = df[df[column].str.contains(pattern, na=False)]
+
+    return df
 
 def latex_table(filepath: str, table: pd.DataFrame, caption: str) -> None:
     """

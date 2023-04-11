@@ -25,6 +25,7 @@ setup(
         "pydub",
         "xlrd",
         "kaleido==0.1.0post1",
-        "ffmpeg"
+        "ffmpeg",
+        "openpyxl"
     ],
 )
