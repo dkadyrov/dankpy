@@ -3,40 +3,8 @@ from datetime import datetime, timedelta
 import math
 import pandas as pd
 
-def pd_listfilter(df: pd.DataFrame,  filter: list, column=None) -> pd.DataFrame:
-    pattern = '|'.join(filter)
 
-    if column is None: 
-        df = df[df.apply(lambda r: r.str.contains(pattern, na=False).any(), axis=1)]
-    if isinstance(column, list): 
-        df = df[df[column].apply(lambda r: r.str.contains(pattern, na=False).any(), axis=1)]
-    elif isinstance(column, str): 
-        df = df[df[column].str.contains(pattern, na=False)]
-
-    return df
-
-def latex_table(filepath: str, table: pd.DataFrame, caption: str) -> None:
-    """
-    Generates latex table from pandas Dataframe
-
-    Args:
-        filepath (str): path to file
-        table (pd.DataFrame): table to convert
-        caption (str): caption for table
-    """
-    with open(filepath, "w") as f:
-        f.write(
-            table.to_latex(
-                index=False,
-                position="h!",
-                caption=caption,
-                bold_rows=True,
-                escape=False,
-            )
-        )
-
-
-def round_to_nearest(x: float, base:int=50) -> float:
+def round_to_nearest(x: float, base: int = 50) -> float:
     """
     Rounds up or down to nearest base value
 
@@ -88,22 +56,3 @@ def list_to_pd(list_of_dicts: list) -> pd.DataFrame:
         _type_: _description_
     """
     return pd.DataFrame(x.__dict__ for x in list_of_dicts)
-
-
-def pd_to_html(data: pd.DataFrame) -> str:
-    """
-    Outputs pandas Dataframe to HTML table
-
-    Args:
-        data (pd.DataFrame): dataframe to convert
-
-    Returns:
-        str: HTML table
-    """
-    return (
-        data.to_html(
-            index=False, classes=["table-bordered", "table-striped", "table-hover"]
-        )
-        .replace("\n", "")
-        .replace("dataframe", "table")
-    )

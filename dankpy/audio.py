@@ -158,7 +158,7 @@ class Audio:
         zmin: int = None,
         zmax: int = None,
         correction: int = 0,
-    ) -> graph.Graph:
+    ) -> graph.Figure:
         """
         Generates spectrograph of audio
 
@@ -172,7 +172,7 @@ class Audio:
             correction (int, optional): dB correction. Defaults to 0.
 
         Returns:
-            graph.Graph: Spectrograph
+            graph.Figure: Spectrograph
         """
 
         time, frequency, Pxx = self.spectrogram(
@@ -191,15 +191,15 @@ class Audio:
 
         return fig
 
-    def signal(self) -> graph.Graph:
+    def signal(self) -> graph.Figure:
         """
         Generates signal graph
 
         Returns:
-            graph.Graph: Signal graph
+            graph.Figure: Signal graph
         """
 
-        fig = graph.Graph()
+        fig = graph.Figure()
         fig.add_trace(
             go.Scatter(
                 x=self.data.datetime,
@@ -282,7 +282,7 @@ def spectrograph(
     zmin: int = None,
     zmax: int = None,
     correction: int = 0,
-) -> graph.Graph:
+) -> graph.Figure:
     """
     Generates spectrograph of audio
 
@@ -295,9 +295,9 @@ def spectrograph(
         zmax (int, optional): Maximum Z value for graph. Defaults to None.
         correction (int, optional): dB correction. Defaults to 0.
     Returns:
-        graph.Graph: _description_
+        graph.Figure: _description_
     """
-    fig = graph.Graph()
+    fig = graph.Figure()
     fig.add_trace(
         go.Heatmap(
             x=time,
