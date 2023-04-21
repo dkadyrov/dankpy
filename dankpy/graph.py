@@ -5,6 +5,7 @@ import plotly
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.io as pio
+
 # from config import mapbox_access_token
 
 colors = [
@@ -102,6 +103,7 @@ def set_size(width: int, fraction=1, subplots=(1, 1)) -> tuple:
 
     return (fig_width_in, fig_height_in)
 
+
 class Figure(go.Figure):
     """
     Custom Plotly figure object
@@ -151,7 +153,7 @@ class Figure(go.Figure):
             ),
         )
 
-    def save_pdf(self, name: str, keep_ticks:bool=False) -> None:
+    def save_pdf(self, name: str, keep_ticks: bool = False) -> None:
         """
         Save figure for LaTeX PDF.
 
@@ -188,17 +190,17 @@ class Figure(go.Figure):
             margin_b=5,
             margin_r=5,
         )
-        
+
         pio.write_image(self, name, width=1.5 * 300, height=0.75 * 300)
         # self.write_image(name, width=1.5*300, height=0.75*300)
 
     def save_image(
         self,
         name: str,
-        dpi:int=300,
-        height:float=None,
-        width:float=None,
-        scale:int=3,
+        dpi: int = 300,
+        height: float = None,
+        width: float = None,
+        scale: int = 3,
     ) -> None:
         """
         Save figure as image.
@@ -220,10 +222,10 @@ class Figure(go.Figure):
                 self["data"][0]["marker"]["color"] = "black"
 
         self.update_layout(
-            margin=dict(l=5, r=60, t=75, b=5),
-            autosize=False,
-            width=width,
-            height=height,
+            margin=dict(l=0, r=0, t=0, b=0),
+            font=dict(
+                size=18,
+            ),
             font_family="Arial",
         )
 
@@ -234,7 +236,7 @@ class Figure(go.Figure):
             }
         )
 
-        self.write_image(f"{name}", scale=scale)
+        self.write_image(f"{name}")
 
     def save_html(self, name: str) -> None:
         """
@@ -287,3 +289,54 @@ class Figure(go.Figure):
         image = self.to_image(format="png", width=6 * dpi, height=3 * dpi, scale=3)
 
         return base64.b64encode(image).decode("ascii")
+
+    def set_legend(self, style="h"):
+        self.update_layout(
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1,
+            )
+        )
+
+
+def set_size(width, fraction=1, subplots=(1, 1)):
+    """Set figure dimensions to avoid scaling in LaTeX.
+
+    Parameters
+    ----------
+    width: float or string
+            Document width in points, or string of predined document type
+    fraction: float, optional
+            Fraction of the width which you wish the figure to occupy
+    subplots: array-like, optional
+            The number of rows and columns of subplots.
+    Returns
+    -------
+    fig_dim: tuple
+            Dimensions of figure in inches
+    """
+    if width == 'thesis':
+        width_pt = 426.79135
+    elif width == 'beamer':
+        width_pt = 307.28987
+    else:
+        width_pt = width
+
+    # Width of figure (in pts)
+    fig_width_pt = width_pt * fraction
+    # Convert from pt to inches
+    inches_per_pt = 1 / 72.27
+
+    # Golden ratio to set aesthetic figure height
+    # https://disq.us/p/2940ij3
+    golden_ratio = (5**.5 - 1) / 2
+
+    # Figure width in inches
+    fig_width_in = fig_width_pt * inches_per_pt
+    # Figure height in inches
+    fig_height_in = fig_width_in * golden_ratio * (subplots[0] / subplots[1])
+
+    return (fig_width_in, fig_height_in)
