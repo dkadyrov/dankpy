@@ -2,15 +2,15 @@ import xlrd
 import dateutil.parser as parser
 from datetime import datetime, timedelta
 
+import pandas as pd
+
 
 class DT(datetime):
     """
     Datetime class with additional methods
     """
-
     def __init__(self, *args, **kw):
         super(DT, self).__init__(*args, **kw)
-
 
 def read_datetime(string: str) -> datetime:
     """

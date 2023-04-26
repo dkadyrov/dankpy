@@ -3,7 +3,7 @@ from dankpy import graph, dt, file
 import plotly.graph_objs as go
 import pandas as pd
 from scipy import signal
-from numpy import log10, fft, conj, abs, arange
+from numpy import log10, fft, conj, abs, arange, append
 from datetime import datetime, timedelta
 import librosa
 import soundfile as sf
@@ -28,7 +28,7 @@ class Audio:
         self.filepath = filepath
         self.filename = os.path.basename(filepath)
         self.audio, self.sample_rate = librosa.load(filepath)
-        self.duration = librosa.get_duration(filename=self.filepath)
+        self.duration = librosa.get_duration(path=self.filepath)
         self.length = self.duration
 
         self.data = pd.DataFrame()
@@ -53,6 +53,33 @@ class Audio:
 
         self.metadata = file.metadata(self.filepath)
         self.data["signal"] = self.audio
+
+    def add_data(self, filepath):
+        """
+        Adds data from another audio file to this one
+
+        Args:
+            filepath (str): filepath to audio file to add
+        """
+
+        audio = Audio(filepath)
+        
+        # TODO Check sample rate of new file and convert if necessary to match
+        self.audio = append(self.audio, audio.audio)
+        
+        self.end = self.start + timedelta(seconds=len(self.audio) / self.sample_rate)
+        
+        self.data = pd.DataFrame()
+        self.data["datetime"] = pd.date_range(
+            start=self.start, end=self.end, periods=len(self.audio)
+        )
+        self.data["signal"] = self.audio
+    
+        if isinstance(self.metadata, dict):
+            self.metadata = [self.metadata]
+            self.metadata.append(audio.metadata)
+
+        self.metadata.append(audio.metadata)
 
     def trim(
         self, start: datetime or str, end: datetime or str = None, length: float = None
@@ -230,6 +257,27 @@ class Audio:
 
         return frequency, power
 
+
+def combine_audio(list_of_files):
+    """
+    Combines audio files into one audio file
+
+    Args:
+        list_of_files (list): List of audio files to combine
+
+    Returns:
+        Audio: Combined audio file
+    """
+
+    combined = None
+
+    for file in list_of_files:
+        if combined == None:
+            combined = Audio(file)
+        else:
+            combined.data.append(Audio(file).data)
+
+    return combined
 
 def spectrogram(
     data: list or pd.Series,
