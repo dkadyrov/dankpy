@@ -24,7 +24,10 @@ class DankFrame(pd.DataFrame):
             list_of_dicts (list): list of dictionaries to convert
 
         """
-        return pd.DataFrame(x.__dict__ for x in list_of_dicts)
+        df = pd.DataFrame(x.__dict__ for x in list_of_dicts)
+        df = df.replace({pd.np.nan: None})
+
+        return df
 
     def list_filter(self, filter: list, column=None) -> pd.DataFrame:
         pattern = "|".join(filter)

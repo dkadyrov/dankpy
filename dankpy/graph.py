@@ -212,8 +212,8 @@ class Figure(go.Figure):
             width (int, optional): width of the image. Defaults to None.
             scale (int, optional): scale of the image. Defaults to 3.
         """
-        if height is None and width is None:
-            width, height = 6 * dpi, 3 * dpi
+        # if height is None and width is None:
+        #     width, height = 6 * dpi, 3 * dpi
 
         if len(self["data"]) == 1:
             if "line" in self["data"][0]:
@@ -223,9 +223,9 @@ class Figure(go.Figure):
 
         self.update_layout(
             margin=dict(l=0, r=0, t=0, b=0),
-            font=dict(
-                size=18,
-            ),
+            # font=dict(
+            #     size=18,
+            # ),
             font_family="Arial",
         )
 
@@ -236,7 +236,7 @@ class Figure(go.Figure):
             }
         )
 
-        self.write_image(f"{name}")
+        self.write_image(f"{name}", height=height, width=width)
 
     def save_html(self, name: str) -> None:
         """
