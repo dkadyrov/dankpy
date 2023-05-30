@@ -4,13 +4,13 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 
-
 class DT(datetime):
     """
     Datetime class with additional methods
     """
     def __init__(self, *args, **kw):
         super(DT, self).__init__(*args, **kw)
+
 
 def read_datetime(string: str) -> datetime:
     """
@@ -116,7 +116,7 @@ def write_date(date, seperator: str = "-") -> str:
     return date.strftime(f"%Y{seperator}%m{seperator}%d")
 
 
-def write_datetime(dt, seperator: str = "-", milliseconds: bool = False) -> str:
+def write_datetime(dt, seperator: str = "-", milliseconds: bool = False, directory=False) -> str:
     """
     Writes datetime in YYYY-MM-DD HH:MM:SS format
 
@@ -128,5 +128,7 @@ def write_datetime(dt, seperator: str = "-", milliseconds: bool = False) -> str:
     Returns:
         str: Datetime in YYYY-MM-DD HH:MM:SS format
     """
+    if directory: 
+        return dt.strftime(f"%Y{seperator}%m{seperator}%d{seperator}%H{seperator}%M{seperator}%S.%f")
 
     return dt.strftime(f"%Y{seperator}%m{seperator}%d %H:%M:%S.%f")

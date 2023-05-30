@@ -24,12 +24,22 @@ class Audio:
     Audio class for handling audio files
     """
 
-    def __init__(self, filepath, start=None):
-        self.filepath = filepath
-        self.filename = os.path.basename(filepath)
-        self.audio, self.sample_rate = librosa.load(filepath)
-        self.duration = librosa.get_duration(path=self.filepath)
-        self.length = self.duration
+    def __init__(self, filepath=None, audio=None, sample_rate=None, start=None):
+        
+        if filepath: 
+            self.filepath = filepath
+            self.filename = os.path.basename(filepath)
+            self.audio, self.sample_rate = librosa.load(filepath)
+            self.duration = librosa.get_duration(path=self.filepath)
+            self.length = self.duration
+
+            self.metadata = file.metadata(self.filepath)
+
+        if audio is not None:
+            self.audio = audio
+            self.sample_rate = sample_rate
+            self.duration = len(self.audio) / self.sample_rate
+            self.length = self.duration
 
         self.data = pd.DataFrame()
 
@@ -51,8 +61,8 @@ class Audio:
             start=self.start, end=self.end, periods=len(self.audio)
         )
 
-        self.metadata = file.metadata(self.filepath)
         self.data["signal"] = self.audio
+
 
     def add_data(self, filepath):
         """
@@ -89,7 +99,7 @@ class Audio:
 
         Args:
             start (datetime or str): Start time of audio
-            end (datetimeorstr, optional): End time of audio. Defaults to None.
+            end (datetime or str, optional): End time of audio. Defaults to None.
             length (float, optional): Length of audio sample in seconds. Defaults to None.
 
         Returns:

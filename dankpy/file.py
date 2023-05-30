@@ -1,6 +1,8 @@
 import os
+import re
+from dankpy import dt 
+import librosa 
 from datetime import datetime
-
 
 class File:
     def init(self, filepath: str):
@@ -13,6 +15,46 @@ class File:
         self.created = datetime.fromtimestamp(os.path.getctime(self.filepath))
         self.accessed = datetime.fromtimestamp(os.path.getatime(self.filepath))
 
+        if self.extension in audiofiles:
+            try: 
+                self.channel = int(re.findall("\d+", self.filename.split("_")[-2])[0])
+            except:
+                pass
+
+            try: 
+                self.record_number = int(self.filename.split("_")[-1].split(".")[0])
+            except: 
+                pass 
+
+            self.sample_rate = librosa.get_samplerate(self.filepath)
+            self.duration = librosa.get_duration(path=self.filepath)
+
+            # TODO - Parse datetime from filename
+            self.start = dt.read_datetime(self.filename[:23])
+            self.end = self.start + dt.timedelta(seconds=self.duration)
+
+    def metadata(self) -> dict: 
+        metadata = {
+            "filepath": self.filepath,
+            "filename": self.filename,
+            "extension": self.extension,
+            "directory": self.directory,
+            "size": self.size,
+            "modified": self.modified,
+            "created": self.created,
+            "accessed": self.accessed,
+        }    
+
+        if self.extension in audiofiles:
+            metadata["channel"] = self.channel
+            metadata["record_number"] = self.record_number
+            metadata["sample_rate"] = self.sample_rate
+            metadata["duration"] = self.duration
+            metadata["start"] = self.start
+            metadata["end"] = self.end
+        
+        return metadata
+            
     def head(self, n: int) -> list:
         """
         Returns first n lines of file
@@ -31,7 +73,7 @@ class File:
                 head_lines = f.read().splitlines()
         return head_lines
 
-    def detect_delimiter(self, n:int=2) -> str:
+    def detect_delimiter(self, n: int = 2) -> str:
         """
         Detects delimiter of file
 
@@ -52,7 +94,47 @@ class File:
         return ","
 
 
-def metadata(filepath: str) -> dict:
+audiofiles = [
+    "wav",
+    "mp3",
+    "aiff",
+    "flac",
+    "ogg",
+    "wma",
+    "m4a",
+    "aac",
+    "alac",
+    "aif",
+    "aifc",
+    "aiffc",
+    "au",
+    "snd",
+    "cdda",
+    "raw",
+    "mpc",
+    "vqf",
+    "tta",
+    "wv",
+    "ape",
+    "ac3",
+    "dts",
+    "dtsma",
+    "dtshr",
+    "dtshd",
+    "eac3",
+    "thd",
+    "thd+ac3",
+    "thd+dts",
+    "thd+dd",
+    "thd+dd+ac3",
+    "thd+dd+dts",
+    "thd+dd+dtsma",
+    "thd+dd+dtshr",
+    "thd+dd+dtshd",
+]
+
+
+def metadata(filepath: str, extended=False) -> dict:
     """
     Generates metadata of file
 
@@ -73,4 +155,17 @@ def metadata(filepath: str) -> dict:
     metadata["created"] = datetime.fromtimestamp(os.path.getctime(filepath))
     metadata["accessed"] = datetime.fromtimestamp(os.path.getatime(filepath))
 
+    if extended:
+        if metadata["extension"] in audiofiles:
+            metadata["channel"] = int(
+                re.findall("\d+", metadata["filename"].split("_")[-2])[0]
+            )
+            metadata["sample_rate"] = librosa.get_samplerate(metadata["filepath"])
+            metadata["duration"] = librosa.get_duration(path=metadata["filepath"])
+            metadata["record_number"] = int(metadata["filename"].split("_")[-1].split(".")[0])
+            metadata["start"] = dt.read_datetime(metadata["filename"][:23])
+            metadata["end"] = metadata["start"] + dt.timedelta(metadata["duration"])
+
+
+    
     return metadata
