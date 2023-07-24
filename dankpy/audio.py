@@ -16,6 +16,8 @@ from pydub import AudioSegment
 from copy import deepcopy
 import os
 
+from plotly_resampler import FigureResampler, FigureWidgetResampler, register_plotly_resampler
+
 valid_audio = ["wav", "flac", "mp3", "ogg", "aiff", "au"]
 
 
@@ -195,6 +197,7 @@ class Audio:
         zmin: int = None,
         zmax: int = None,
         correction: int = 0,
+        showscale: bool = False,
     ) -> graph.Figure:
         """
         Generates spectrograph of audio
@@ -224,19 +227,22 @@ class Audio:
             zmin=zmin,
             zmax=zmax,
             correction=correction,
+            showscale=showscale,
         )
 
         return fig
 
-    def signal(self) -> graph.Figure:
+    def waveform(self) -> graph.Figure:
         """
         Generates signal graph
 
         Returns:
             graph.Figure: Signal graph
         """
+        # register_plotly_resampler(mode='auto')
 
         fig = graph.Figure()
+        fig = FigureResampler(fig)
         fig.add_trace(
             go.Scatter(
                 x=self.data.datetime,
@@ -267,6 +273,33 @@ class Audio:
 
         return frequency, power
 
+    def butter_lowpass(self, cutoff, order=4, overwrite=False): 
+        """
+        Lowpass filter using Butterworth filter
+
+        Args:
+            cutoff (int): Cutoff frequency
+            order (int): Order of filter
+
+        Returns:
+            Audio: Filtered audio
+        """
+
+        audio = butter_lowpass(self.data.signal, cutoff, self.sample_rate, order)
+
+        if overwrite == True:
+            self.data.signal = audio
+            self.audio = audio
+        else: 
+            return list(audio)
+
+def butter_lowpass(data, cutoff, fs, order):
+    nyq = 0.5 * fs 
+    cutoff = cutoff / nyq
+    b, a = signal.butter(order, cutoff, btype="lowpass", analog=False)
+    y = signal.filtfilt(b, a, data)
+
+    return y 
 
 def combine_audio(list_of_files):
     """
@@ -340,6 +373,7 @@ def spectrograph(
     zmin: int = None,
     zmax: int = None,
     correction: int = 0,
+    showscale: bool = False,
 ) -> graph.Figure:
     """
     Generates spectrograph of audio
@@ -362,12 +396,16 @@ def spectrograph(
             y=frequency,
             z=10 * log10(Pxx) + correction,
             colorscale=colorscale,
-            showscale=False,
             zmin=zmin,
             zmax=zmax,
-            zsmooth="best"
+            zsmooth="best",
+            showscale=showscale,
+            colorbar=dict(title="Power [dBFS]", titleside="right"),
         )
     )
+    if showscale == True: 
+        fig.update_layout(coloraxis_colorbar=dict(title="Power [dBFS]"))
+
     fig.update_layout(yaxis=dict(title="Frequency [Hz]"))
 
     return fig

@@ -1,3 +1,4 @@
+#%%
 import io
 import base64
 import os
@@ -5,8 +6,12 @@ import plotly
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.io as pio
-
+import plotly.io as pio
+pio.kaleido.scope.default_format = "svg"
 # from config import mapbox_access_token
+
+# from plotly_resampler import register_plotly_resampler
+# from plotly_resampler import FigureResampler, FigureWidgetResampler
 
 colors = [
     "#1f77b4",  # muted blue
@@ -103,16 +108,19 @@ def set_size(width: int, fraction=1, subplots=(1, 1)) -> tuple:
 
     return (fig_width_in, fig_height_in)
 
+from plotly.subplots import make_subplots
 
 class Figure(go.Figure):
     """
     Custom Plotly figure object
     """
-
     zoom = None
 
     def __init__(self, *args, **kw):
         super(Figure, self).__init__(*args, **kw)
+        self.__class__ = go.Figure
+        # register_plotly_resampler(mode="auto")
+
         # pio.full_figure_for_development(self, warn=False)
         # self = go.Figure()
         self.update_layout(
@@ -229,12 +237,12 @@ class Figure(go.Figure):
             font_family="Arial",
         )
 
-        self.update_layout(
-            {
-                "plot_bgcolor": "rgba(0, 0, 0, 0)",
-                "paper_bgcolor": "rgba(0, 0, 0, 0)",
-            }
-        )
+        # self.update_layout(
+        #     {
+        #         "plot_bgcolor": "rgba(0, 0, 0, 0)",
+        #         "paper_bgcolor": "rgba(0, 0, 0, 0)",
+        #     }
+        # )
 
         self.write_image(f"{name}", height=height, width=width)
 
@@ -340,3 +348,4 @@ def set_size(width, fraction=1, subplots=(1, 1)):
     fig_height_in = fig_width_in * golden_ratio * (subplots[0] / subplots[1])
 
     return (fig_width_in, fig_height_in)
+#%%
