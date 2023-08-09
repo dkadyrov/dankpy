@@ -1,22 +1,25 @@
-from asyncio import start_server
-from dankpy import graph, dt, file
-import plotly.graph_objs as go
-import pandas as pd
-from scipy import signal
-from numpy import log10, fft, conj, abs, arange, append
-from datetime import datetime, timedelta
-import librosa
-import soundfile as sf
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-import soundfile as sf
-import librosa
-import librosa.display
-from pydub import AudioSegment
 from copy import deepcopy
-import os
+from dankpy import graph, dt, file
+from datetime import datetime, timedelta
 
-from plotly_resampler import FigureResampler, FigureWidgetResampler, register_plotly_resampler
+import numpy as np
+
+np.seterr(divide="ignore")
+
+from pydub import AudioSegment
+from scipy import signal
+import librosa
+
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
+import noisereduce as nr
+import os
+import pandas as pd
+import plotly.graph_objs as go
+import soundfile as sf
+
+# from plotly_resampler import FigureResampler, FigureWidgetResampler, register_plotly_resampler
 
 valid_audio = ["wav", "flac", "mp3", "ogg", "aiff", "au"]
 
@@ -27,8 +30,7 @@ class Audio:
     """
 
     def __init__(self, filepath=None, audio=None, sample_rate=None, start=None):
-        
-        if filepath: 
+        if filepath:
             self.filepath = filepath
             self.filename = os.path.basename(filepath)
             self.audio, self.sample_rate = librosa.load(filepath)
@@ -64,7 +66,8 @@ class Audio:
         )
 
         self.data["signal"] = self.audio
-
+        self.data["time [s]"] = self.data.index / len(self.data) * self.length
+        self.data["time [ms]"] = self.data["time [s]"] * 1000
 
     def add_data(self, filepath):
         """
@@ -75,26 +78,31 @@ class Audio:
         """
 
         audio = Audio(filepath)
-        
+
         # TODO Check sample rate of new file and convert if necessary to match
-        self.audio = append(self.audio, audio.audio)
-        
+        self.audio = np.append(self.audio, audio.audio)
+
         self.end = self.start + timedelta(seconds=len(self.audio) / self.sample_rate)
-        
+
         self.data = pd.DataFrame()
         self.data["datetime"] = pd.date_range(
             start=self.start, end=self.end, periods=len(self.audio)
         )
         self.data["signal"] = self.audio
-    
+
         if isinstance(self.metadata, dict):
             self.metadata = [self.metadata]
-            self.metadata.append(audio.metadata)
+            self.metadata.np.append(audio.metadata)
 
-        self.metadata.append(audio.metadata)
+        self.metadata.np.append(audio.metadata)
 
     def trim(
-        self, start: datetime or str, end: datetime or str = None, length: float = None
+        self,
+        start: datetime or str,
+        end: datetime or str = None,
+        length: float = None,
+        method="datetime",
+        restart=False,
     ):
         """
         Trims audio to specified start and end times or length
@@ -107,31 +115,92 @@ class Audio:
         Returns:
             audio.Audio: Trimmed audio sample
         """
+        if method == "datetime":
+            if not isinstance(start, datetime):
+                try:
+                    start = dt.read_datetime(start)
+                except:
+                    start = start
 
-        if not isinstance(start, datetime):
-            start = dt.read_datetime(start)
+            if end == None:
+                if isinstance(start, datetime):
+                    end = start + timedelta(seconds=length)
+            else:
+                if not isinstance(end, datetime):
+                    end = dt.read_datetime(end)
 
-        if end == None:
-            end = start + timedelta(seconds=length)
-        else:
-            if not isinstance(end, datetime):
-                end = dt.read_datetime(end)
+            if length == None:
+                length = (end - start).total_seconds()
 
-        if length == None:
-            length = (end - start).total_seconds()
+            # number = round((start - start).total_seconds()/self.sample_rate)
+            # number_end = round((end - start).total_seconds()/self.sample_rate)
 
-        # number = round((start - start).total_seconds()/self.sample_rate)
-        # number_end = round((end - start).total_seconds()/self.sample_rate)
+            sample = deepcopy(self)
+            sample.data = sample.data.loc[
+                (sample.data.datetime >= start) & (sample.data.datetime <= end)
+            ]
+            sample.start = start
+            sample.end = end
+            sample.audio = sample.data.signal.values
+            sample.length = len(sample.audio) / sample.sample_rate
+            sample.duration = sample.length
 
-        sample = deepcopy(self)
-        sample.data = sample.data.loc[
-            (sample.data.datetime >= start) & (sample.data.datetime <= end)
-        ]
-        sample.start = start
-        sample.end = end
-        sample.audio = sample.data.signal.values
-        sample.length = len(sample.audio) / sample.sample_rate
-        sample.duration = sample.length
+        if method == "samples":
+            if end == None:
+                end = start + length
+
+            sample = deepcopy(self)
+            sample.data = sample.data.loc[start:end]
+            sample.start = sample.data.datetime.iloc[0]
+            sample.end = sample.data.datetime.iloc[-1]
+            sample.audio = sample.data.signal.values
+            sample.length = len(sample.audio) / sample.sample_rate
+            sample.duration = sample.length
+
+        if method == "seconds":
+            if end == None:
+                end = start + length
+
+            sample = deepcopy(self)
+            sample.data = sample.data.loc[
+                (sample.data["time [s]"] >= start) & (sample.data["time [s]"] <= end)
+            ]
+
+            if restart:
+                sample.start = 0
+                sample.end = len(sample.audio) / sample.sample_rate
+                sample.data = sample.data.reset_index(drop=True)
+                sample.data["time [s]"] = (
+                    sample.data.index / len(sample.data) * sample.length
+                )
+                sample.data["time [ms]"] = sample.data["time [s]"] * 1000
+
+            sample.audio = sample.data.signal.values
+            sample.length = len(sample.audio)
+            sample.duration
+
+        if method == "ms":
+            if end == None:
+                end = start + length
+
+            sample = deepcopy(self)
+            sample.data = sample.data.loc[
+                (sample.data["time [ms]"] >= start) & (sample.data["time [ms]"] <= end)
+            ]
+
+            if restart:
+                sample.start = 0
+                sample.end = len(sample.audio) / sample.sample_rate
+                sample.data = sample.data.reset_index(drop=True)
+                sample.data["time [s]"] = (
+                    sample.data.index / len(sample.data) * sample.length
+                )
+                sample.data["time [ms]"] = sample.data["time [s]"] * 1000
+            # sample.start = sample.data.datetime.iloc[0]
+            # sample.end = sample.data.datetime.iloc[-1]
+            sample.audio = sample.data.signal.values
+            sample.length = len(sample.audio) / sample.sample_rate
+            sample.duration = sample.length
 
         return sample
 
@@ -157,6 +226,7 @@ class Audio:
 
     def spectrogram(
         self,
+        window="hann",
         window_size: int = 8192,
         nfft: int = 4096,
         noverlap: int = 4096,
@@ -178,6 +248,7 @@ class Audio:
         time, frequency, Pxx = spectrogram(
             self.data.signal,
             self.sample_rate,
+            window=window,
             window_size=window_size,
             nfft=nfft,
             noverlap=noverlap,
@@ -188,74 +259,165 @@ class Audio:
 
         return time, frequency, Pxx
 
-    def spectrograph(
+    def plot_spectrogram(
         self,
+        window="hann",
         window_size: int = 8192,
         nfft: int = 4096,
         noverlap: int = 4096,
         nperseg: int = 8192,
         zmin: int = None,
         zmax: int = None,
-        correction: int = 0,
+        gain: int = 0,
         showscale: bool = False,
-    ) -> graph.Figure:
-        """
-        Generates spectrograph of audio
-
-        Args:
-            window_size (int, optional): Window size in samples. Defaults to 8192.
-            nfft (int, optional): FFT number. Defaults to 4096.
-            noverlap (int, optional): Overlap amount in samples. Defaults to 4096.
-            nperseg (int, optional): Number of samples per segment. Defaults to 8192.
-            zmin (int, optional): Minimum Z value for graph. Defaults to None.
-            zmax (int, optional): Maximum Z value for graph. Defaults to None.
-            correction (int, optional): dB correction. Defaults to 0.
-
-        Returns:
-            graph.Figure: Spectrograph
-        """
+        datetime=True,
+        cmap="jet",
+        aspect="auto",
+    ):
+        fig, ax = plt.subplots()
 
         time, frequency, Pxx = self.spectrogram(
-            window_size=window_size, nfft=nfft, noverlap=noverlap, nperseg=nperseg
+            window=window,
+            window_size=window_size,
+            nfft=nfft,
+            noverlap=noverlap,
+            nperseg=nperseg,
         )
 
-        fig = spectrograph(
-            time,
-            frequency,
+        Pxx = 10 * np.log10(Pxx) + gain
+
+        if zmin == None:
+            zmin = Pxx.min()
+        if zmax == None:
+            zmax = Pxx.max()
+
+        if datetime == True:
+            extents = [self.start, self.end, frequency.min(), frequency.max()]
+        else:
+            extents = [
+                self.data["time [s]"].min(),
+                self.data["time [s]"].max(),
+                frequency.min(),
+                frequency.max(),
+            ]
+
+        axi = ax.imshow(
             Pxx,
-            colorscale="Jet",
-            zmin=zmin,
-            zmax=zmax,
-            correction=correction,
-            showscale=showscale,
+            cmap=cmap,
+            aspect=aspect,
+            extent=extents,
+            origin="lower",
         )
+        axi.set_clim([zmin, zmax])
 
-        return fig
+        ax.set_ylabel("Frequency [Hz]")
 
-    def waveform(self) -> graph.Figure:
-        """
-        Generates signal graph
+        if datetime == True:
+            ax.set_xlim([self.data.datetime.iloc[0], self.data.datetime.iloc[-1]])
+        else:
+            ax.set_xlabel("Time [s]")
+            ax.set_xlim(0, self.length)
 
-        Returns:
-            graph.Figure: Signal graph
-        """
-        # register_plotly_resampler(mode='auto')
-
-        fig = graph.Figure()
-        fig = FigureResampler(fig)
-        fig.add_trace(
-            go.Scatter(
-                x=self.data.datetime,
-                y=self.data.signal,
+        if showscale:
+            cbar = fig.colorbar(
+                axi, location="right", label="Amplitude [a.u.]", ticks=[zmin, zmax]
             )
-        )
 
-        fig.update_layout(
-            yaxis_title="Signal [a.u.]",
-            yaxis_range=[-1.5, 1.5],
-        )
+        return fig, ax
 
-        return fig
+    # def spectrograph(
+    #     self,
+    #     window_size: int = 8192,
+    #     nfft: int = 4096,
+    #     noverlap: int = 4096,
+    #     nperseg: int = 8192,
+    #     zmin: int = None,
+    #     zmax: int = None,
+    #     correction: int = 0,
+    #     showscale: bool = False,
+    # ) -> graph.Figure:
+    #     """
+    #     Generates spectrograph of audio
+
+    #     Args:
+    #         window_size (int, optional): Window size in samples. Defaults to 8192.
+    #         nfft (int, optional): FFT number. Defaults to 4096.
+    #         noverlap (int, optional): Overlap amount in samples. Defaults to 4096.
+    #         nperseg (int, optional): Number of samples per segment. Defaults to 8192.
+    #         zmin (int, optional): Minimum Z value for graph. Defaults to None.
+    #         zmax (int, optional): Maximum Z value for graph. Defaults to None.
+    #         correction (int, optional): dB correction. Defaults to 0.
+
+    #     Returns:
+    #         graph.Figure: Spectrograph
+    #     """
+
+    #     time, frequency, Pxx = self.spectrogram(
+    #         window_size=window_size, nfft=nfft, noverlap=noverlap, nperseg=nperseg
+    #     )
+
+    #     fig = spectrograph(
+    #         time,
+    #         frequency,
+    #         Pxx,
+    #         colorscale="Jet",
+    #         zmin=zmin,
+    #         zmax=zmax,
+    #         correction=correction,
+    #         showscale=showscale,
+    #     )
+
+    #     return fig
+
+    # def waveform(self) -> graph.Figure:
+    #     """
+    #     Generates signal graph
+
+    #     Returns:
+    #         graph.Figure: Signal graph
+    #     """
+    #     # register_plotly_resampler(mode='auto')
+
+    #     fig = graph.Figure()
+    #     # fig = FigureResampler(fig)
+    #     fig.add_trace(
+    #         go.Scatter(
+    #             x=self.data.datetime,
+    #             y=self.data.signal,
+    #         )
+    #     )
+
+    #     fig.update_layout(
+    #         yaxis_title="Signal [a.u.]",
+    #         yaxis_range=[-1.5, 1.5],
+    #     )
+
+    #     return fig
+
+    def plot_waveform(self, method: str = "datetime"):
+        fig, ax = plt.subplots()
+
+        if method == "datetime":
+            ax.plot(self.data.datetime, self.data.signal)
+            ax.set_xlim(self.start, self.end)
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M:%S"))
+            ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=2))
+
+        if method == "seconds":
+            ax.plot(self.data["time [s]"], self.data.signal)
+            ax.set_xlabel("Time [s]")
+
+        if method == "ms":
+            ax.plot(self.data["time [ms]"], self.data.signal)
+            ax.set_xlabel("Time [ms]")
+
+        if method == "samples":
+            ax.plot(self.data.index, self.data.signal)
+            ax.set_xlabel("Samples")
+
+        ax.set_ylabel("Amplitude [a.u.]")
+
+        return fig, ax
 
     def psd(self, window_size: int = 4096) -> tuple:
         """
@@ -273,7 +435,26 @@ class Audio:
 
         return frequency, power
 
-    def butter_lowpass(self, cutoff, order=4, overwrite=False): 
+    def plot_psd(self, window_size: int = 4096) -> tuple:
+        """
+        Plots the power spectral density of the audio
+
+        Args:
+            window_size (int, optional): Sample window size. Defaults to 4096.
+
+        Returns:
+            tuple: figure, axis
+        """
+        frequency, power = self.psd(window_size=window_size)
+
+        fig, ax = plt.subplots()
+        ax.plot(frequency, power)
+        ax.set_xlabel("Frequency [Hz]")
+        ax.set_ylabel("Power [dB]")
+
+        return fig, ax
+
+    def butter_lowpass(self, cutoff, order=4, overwrite=False):
         """
         Lowpass filter using Butterworth filter
 
@@ -290,16 +471,48 @@ class Audio:
         if overwrite == True:
             self.data.signal = audio
             self.audio = audio
-        else: 
+        else:
             return list(audio)
 
+    def reduce_noise(
+        self,
+        nfft=2048,
+        hop_length=512,
+        time_mask_smooth_ms=200,
+        time_constant_s=3,
+        freq_mask_smooth_hz=50,
+        replace=False,
+    ):
+        """
+        Reduces noise in audio
+        """
+
+        data = nr.reduce_noise(
+            y=self.data.signal,  # audio data
+            sr=self.sample_rate,  # sample rate
+            prop_decrease=0.98,  # decrease noise by 98% (not an entirely binary mask)
+            n_fft=nfft,  # number of FFT bins
+            hop_length=hop_length,  # number of samples between FFT windows
+            time_mask_smooth_ms=time_mask_smooth_ms,  # mask smoothing parameter
+            time_constant_s=time_constant_s,  # time smoothing parameter
+            freq_mask_smooth_hz=freq_mask_smooth_hz,  # mask smoothing parameter
+        )
+
+        if replace:
+            self.data.signal = data
+            self.audio = data
+
+        return data
+
+
 def butter_lowpass(data, cutoff, fs, order):
-    nyq = 0.5 * fs 
+    nyq = 0.5 * fs
     cutoff = cutoff / nyq
     b, a = signal.butter(order, cutoff, btype="lowpass", analog=False)
     y = signal.filtfilt(b, a, data)
 
-    return y 
+    return y
+
 
 def combine_audio(list_of_files):
     """
@@ -318,14 +531,16 @@ def combine_audio(list_of_files):
         if combined == None:
             combined = Audio(file)
         else:
-            combined.data.append(Audio(file).data)
+            combined.data.np.append(Audio(file).data)
 
     return combined
+
 
 def spectrogram(
     data: list or pd.Series,
     sample_rate: int,
     window_size: int = 8192,
+    window="hann",
     nfft: int = 4096,
     noverlap: int = 4096,
     nperseg: int = 8192,
@@ -348,11 +563,23 @@ def spectrogram(
     Returns:
         tuple: time, frequency, Pxx
     """
-
-    window = signal.windows.hann(window_size)
+    if window == "hann":
+        window = signal.windows.hann(window_size)
+    elif window == "hamming":
+        window = signal.windows.hamming(window_size)
+    elif window == "blackman":
+        window = signal.windows.blackman(window_size)
+    elif window == "bartlett":
+        window = signal.windows.bartlett(window_size)
 
     frequency, time, Pxx = signal.spectrogram(
-        data, sample_rate, window=window, mode="psd", noverlap=noverlap
+        data,
+        sample_rate,
+        window=window,
+        nfft=nfft,
+        noverlap=noverlap,
+        nperseg=nperseg,
+        mode="psd",
     )
 
     if start:
@@ -365,50 +592,50 @@ def spectrogram(
     return time, frequency, Pxx
 
 
-def spectrograph(
-    time: list or pd.Series,
-    frequency: list or pd.Series,
-    Pxx: list or pd.Series,
-    colorscale: str = "Jet",
-    zmin: int = None,
-    zmax: int = None,
-    correction: int = 0,
-    showscale: bool = False,
-) -> graph.Figure:
-    """
-    Generates spectrograph of audio
+# def spectrograph(
+#     time: list or pd.Series,
+#     frequency: list or pd.Series,
+#     Pxx: list or pd.Series,
+#     colorscale: str = "Jet",
+#     zmin: int = None,
+#     zmax: int = None,
+#     correction: int = 0,
+#     showscale: bool = False,
+# ) -> graph.Figure:
+#     """
+#     Generates spectrograph of audio
 
-    Args:
-        time (list or pd.Series): Time of spectrogram
-        frequency (list or pd.Series): Frequency of spectrogram
-        Pxx (list or pd.Series): Power of spectrogram
-        colorscale (str, optional): Colorscale of graph. Defaults to "Jet".
-        zmin (int, optional): Minimum Z value for graph. Defaults to None.
-        zmax (int, optional): Maximum Z value for graph. Defaults to None.
-        correction (int, optional): dB correction. Defaults to 0.
-    Returns:
-        graph.Figure: _description_
-    """
-    fig = graph.Figure()
-    fig.add_trace(
-        go.Heatmap(
-            x=time,
-            y=frequency,
-            z=10 * log10(Pxx) + correction,
-            colorscale=colorscale,
-            zmin=zmin,
-            zmax=zmax,
-            zsmooth="best",
-            showscale=showscale,
-            colorbar=dict(title="Power [dBFS]", titleside="right"),
-        )
-    )
-    if showscale == True: 
-        fig.update_layout(coloraxis_colorbar=dict(title="Power [dBFS]"))
+#     Args:
+#         time (list or pd.Series): Time of spectrogram
+#         frequency (list or pd.Series): Frequency of spectrogram
+#         Pxx (list or pd.Series): Power of spectrogram
+#         colorscale (str, optional): Colorscale of graph. Defaults to "Jet".
+#         zmin (int, optional): Minimum Z value for graph. Defaults to None.
+#         zmax (int, optional): Maximum Z value for graph. Defaults to None.
+#         correction (int, optional): dB correction. Defaults to 0.
+#     Returns:
+#         graph.Figure: _description_
+#     """
+#     fig = graph.Figure()
+#     fig.add_trace(
+#         go.Heatmap(
+#             x=time,
+#             y=frequency,
+#             z=10 * np.log10(Pxx) + correction,
+#             colorscale=colorscale,
+#             zmin=zmin,
+#             zmax=zmax,
+#             zsmooth="best",
+#             showscale=showscale,
+#             colorbar=dict(title="Power [dBFS]", titleside="right"),
+#         )
+#     )
+#     if showscale == True:
+#         fig.update_layout(coloraxis_colorbar=dict(title="Power [dBFS]"))
 
-    fig.update_layout(yaxis=dict(title="Frequency [Hz]"))
+#     fig.update_layout(yaxis=dict(title="Frequency [Hz]"))
 
-    return fig
+#     return fig
 
 
 def write_audio(data: list or pd.Series, filepath: str, sample_rate: int) -> None:
@@ -422,6 +649,7 @@ def write_audio(data: list or pd.Series, filepath: str, sample_rate: int) -> Non
     """
 
     sf.write(filepath + ".wav", data, sample_rate)
+
 
 def mp3_to_wav(input: str, output: str, output_format: str = "wav") -> None:
     """
@@ -449,11 +677,11 @@ def psd(x: list or pd.Series, sample_rate: int, window_size: int = 4096) -> tupl
         tuple: power spectral density
     """
 
-    f = fft.rfft(x)
+    f = np.fft.rfft(x)
     f1 = f[0 : int(window_size / 2)]
-    pf1 = 2 * abs(f1 * conj(f1)) / (sample_rate * window_size)
-    lpf1 = 10 * log10(pf1)
-    w = arange(1, window_size / 2 + 1)
+    pf1 = 2 * np.abs(f1 * np.conj(f1)) / (sample_rate * window_size)
+    lpf1 = 10 * np.log10(pf1)
+    w = np.arange(1, window_size / 2 + 1)
     lp = lpf1[1 : int(window_size / 2)]
     w1 = sample_rate * w / window_size
 

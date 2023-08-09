@@ -369,13 +369,13 @@ axes.linewidth: 1    # edge line width
 #axes.grid.axis:     both    # which axis the grid should apply to
 #axes.grid.which:    major   # grid lines at {major, minor, both} ticks
 #axes.titlelocation: center  # alignment of the title: {left, right, center}
-axes.titlesize: 11   # font size of the axes title
+axes.titlesize: large   # font size of the axes title
 #axes.titleweight:   normal  # font weight of title
 #axes.titlecolor:    auto    # color of the axes title, auto falls back to
                              # text.color as default value
 #axes.titley:        None    # position title (axes relative units).  None implies auto
 #axes.titlepad:      6.0     # pad between axes and title in points
-axes.labelsize: 11  # font size of the x and y labels
+axes.labelsize: large  # font size of the x and y labels
 #axes.labelpad:      4.0     # space between label and axis
 #axes.labelweight:   normal  # weight of the x and y labels
 #axes.labelcolor:    black
@@ -477,7 +477,7 @@ xtick.major.size: 4.0
 xtick.minor.size: 2.0
 xtick.major.width: 0.5
 xtick.minor.width: 0.5
-xtick.direction: in
+xtick.direction: out
 xtick.minor.visible: True
 xtick.major.top: True
 xtick.major.bottom: True
@@ -485,7 +485,7 @@ xtick.minor.top: True
 xtick.minor.bottom: True
 xtick.major.pad: 5.0
 xtick.minor.pad: 5.0
-ytick.labelsize:11
+ytick.labelsize:large
 
 ytick.left: True
 ytick.right: True
@@ -493,7 +493,7 @@ ytick.right: True
 # ytick.minor.size: 2.0
 # ytick.major.width: 0.5
 # ytick.minor.width: 0.5
-ytick.direction: in
+ytick.direction: out
 ytick.minor.visible: True
 ytick.major.left: True
 ytick.major.right: True
@@ -501,7 +501,7 @@ ytick.minor.left: True
 ytick.minor.right: True
 ytick.major.pad: 5.0
 ytick.minor.pad: 5.0
-xtick.labelsize:11
+xtick.labelsize:large
 ## ***************************************************************************
 
 
@@ -529,7 +529,7 @@ legend.fancybox:      False     # if True, use a rounded box for the
 #legend.numpoints:     1        # the number of marker points in the legend line
 #legend.scatterpoints: 1        # number of scatter points
 #legend.markerscale:   1.0      # the relative size of legend markers vs. original
-legend.fontsize: 11
+legend.fontsize: large
 #legend.labelcolor:    None
 #legend.title_fontsize: None    # None sets to the same as the default axes.
 

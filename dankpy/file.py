@@ -1,6 +1,6 @@
 import os
 import re
-from dankpy import dt 
+from dankpy import dt, dankframe
 import librosa 
 from datetime import datetime
 
@@ -148,7 +148,7 @@ def metadata(filepath: str, extended=False) -> dict:
     metadata = {}
     metadata["filepath"] = filepath
     metadata["filename"] = os.path.basename(filepath)
-    metadata["extension"] = os.path.splitext(filepath)[1]
+    metadata["extension"] = os.path.splitext(filepath)[1].replace(".", "")
     metadata["directory"] = os.path.dirname(filepath)
     metadata["size"] = os.path.getsize(filepath)
     metadata["modified"] = datetime.fromtimestamp(os.path.getmtime(filepath))
@@ -157,15 +157,49 @@ def metadata(filepath: str, extended=False) -> dict:
 
     if extended:
         if metadata["extension"] in audiofiles:
-            metadata["channel"] = int(
-                re.findall("\d+", metadata["filename"].split("_")[-2])[0]
-            )
-            metadata["sample_rate"] = librosa.get_samplerate(metadata["filepath"])
-            metadata["duration"] = librosa.get_duration(path=metadata["filepath"])
-            metadata["record_number"] = int(metadata["filename"].split("_")[-1].split(".")[0])
-            metadata["start"] = dt.read_datetime(metadata["filename"][:23])
-            metadata["end"] = metadata["start"] + dt.timedelta(metadata["duration"])
+            try: 
+                metadata["channel"] = int(
+                    re.findall("\d+", metadata["filename"].split("_")[-2])[0]
+                )
+            except:
+                metadata["channel"] = None
 
+            try: 
+                metadata["sample_rate"] = librosa.get_samplerate(metadata["filepath"])
+            except:
+                metadata["sample_rate"] = None
 
-    
+            try:  
+                metadata["duration"] = librosa.get_duration(path=metadata["filepath"])
+            except:
+                metadata["duration"] = None
+
+            try: 
+                metadata["record_number"] = int(metadata["filename"].split("_")[-1].split(".")[0])
+            except:
+                metadata["record_number"] = None
+                
+            try: 
+                metadata["start"] = dt.read_datetime(metadata["filename"][:23])
+            except:
+                metadata["start"]  = None
+
+            try: 
+                metadata["end"] = metadata["start"] + dt.timedelta(seconds=metadata["duration"])
+            except: 
+                metadata["end"] = None
+
     return metadata
+
+def metadatas(filepaths: list, extended=False) -> dankframe.DankFrame:
+    """
+    Generates metadata of files
+
+    Args:
+        filepaths (list): list of filepaths
+
+    Returns:
+        pd.DataFrame: metadata of files
+    """
+
+    return dankframe.pd.DataFrame([metadata(filepath, extended) for filepath in filepaths])

@@ -9,8 +9,10 @@ def read_list(list_of_dicts: list) -> pd.DataFrame:
         list_of_dicts (list): list of dictionaries to convert
 
     """
-    return DankFrame(x.__dict__ for x in list_of_dicts)
-
+    try: 
+        return DankFrame(x.__dict__ for x in list_of_dicts)
+    except:
+        return pd.DataFrame(list_of_dicts)
 
 class DankFrame(pd.DataFrame):
     def __init__(self, *args, **kwargs):
