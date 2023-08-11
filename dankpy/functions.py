@@ -249,3 +249,18 @@ def gaussian_model(
     results = {"residuals": corr, "sigma": perr}
 
     return y2, results
+
+def sigmoid(x: list, shift: int, multiplier: int) -> list:
+    """
+    Sigmoid function
+
+    Args:
+        x (list | np.array): input
+        shift (int): shift
+        multiplier (int): multiplier
+
+    Returns:
+        np.array: sigmoid of x
+    """
+
+    return 1 / (1 + np.exp(-(x - shift) * multiplier))

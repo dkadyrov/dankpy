@@ -35,7 +35,7 @@ class Audio:
             self.filename = os.path.basename(filepath)
             self.audio, self.sample_rate = librosa.load(filepath)
             self.duration = librosa.get_duration(path=self.filepath)
-            self.length = self.duration
+            self.length = len(self.audio)
 
             self.metadata = file.metadata(self.filepath)
 
@@ -43,7 +43,7 @@ class Audio:
             self.audio = audio
             self.sample_rate = sample_rate
             self.duration = len(self.audio) / self.sample_rate
-            self.length = self.duration
+            self.length = len(self.audio)
 
         self.data = pd.DataFrame()
 
@@ -66,7 +66,7 @@ class Audio:
         )
 
         self.data["signal"] = self.audio
-        self.data["time [s]"] = self.data.index / len(self.data) * self.length
+        self.data["time [s]"] = self.data.index/self.sample_rate
         self.data["time [ms]"] = self.data["time [s]"] * 1000
 
     def add_data(self, filepath):
@@ -110,11 +110,13 @@ class Audio:
         Args:
             start (datetime or str): Start time of audio
             end (datetime or str, optional): End time of audio. Defaults to None.
-            length (float, optional): Length of audio sample in seconds. Defaults to None.
+            length (float, optional): Length of audio sample in seconds, milliseconds, or samples. Defaults to None.
 
         Returns:
             audio.Audio: Trimmed audio sample
         """
+        sample = deepcopy(self)
+
         if method == "datetime":
             if not isinstance(start, datetime):
                 try:
@@ -132,18 +134,9 @@ class Audio:
             if length == None:
                 length = (end - start).total_seconds()
 
-            # number = round((start - start).total_seconds()/self.sample_rate)
-            # number_end = round((end - start).total_seconds()/self.sample_rate)
-
-            sample = deepcopy(self)
             sample.data = sample.data.loc[
                 (sample.data.datetime >= start) & (sample.data.datetime <= end)
             ]
-            sample.start = start
-            sample.end = end
-            sample.audio = sample.data.signal.values
-            sample.length = len(sample.audio) / sample.sample_rate
-            sample.duration = sample.length
 
         if method == "samples":
             if end == None:
@@ -151,56 +144,35 @@ class Audio:
 
             sample = deepcopy(self)
             sample.data = sample.data.loc[start:end]
-            sample.start = sample.data.datetime.iloc[0]
-            sample.end = sample.data.datetime.iloc[-1]
-            sample.audio = sample.data.signal.values
-            sample.length = len(sample.audio) / sample.sample_rate
-            sample.duration = sample.length
 
         if method == "seconds":
             if end == None:
                 end = start + length
 
-            sample = deepcopy(self)
             sample.data = sample.data.loc[
                 (sample.data["time [s]"] >= start) & (sample.data["time [s]"] <= end)
             ]
-
-            if restart:
-                sample.start = 0
-                sample.end = len(sample.audio) / sample.sample_rate
-                sample.data = sample.data.reset_index(drop=True)
-                sample.data["time [s]"] = (
-                    sample.data.index / len(sample.data) * sample.length
-                )
-                sample.data["time [ms]"] = sample.data["time [s]"] * 1000
-
-            sample.audio = sample.data.signal.values
-            sample.length = len(sample.audio)
-            sample.duration
 
         if method == "ms":
             if end == None:
                 end = start + length
 
-            sample = deepcopy(self)
             sample.data = sample.data.loc[
                 (sample.data["time [ms]"] >= start) & (sample.data["time [ms]"] <= end)
             ]
 
-            if restart:
-                sample.start = 0
-                sample.end = len(sample.audio) / sample.sample_rate
-                sample.data = sample.data.reset_index(drop=True)
-                sample.data["time [s]"] = (
-                    sample.data.index / len(sample.data) * sample.length
-                )
-                sample.data["time [ms]"] = sample.data["time [s]"] * 1000
-            # sample.start = sample.data.datetime.iloc[0]
-            # sample.end = sample.data.datetime.iloc[-1]
-            sample.audio = sample.data.signal.values
-            sample.length = len(sample.audio) / sample.sample_rate
-            sample.duration = sample.length
+        if restart:
+            sample.data = sample.data.reset_index(drop=True)
+            sample.data["time [s]"] = (
+                sample.data.index / sample.sample_rate
+            )
+            sample.data["time [ms]"] = sample.data["time [s]"] * 1000
+
+        sample.start = sample.data.datetime.iloc[0]
+        sample.end = sample.data.datetime.iloc[-1]
+        sample.audio = sample.data.signal.values
+        sample.length = len(sample.audio)
+        sample.duration = len(sample.audio) / sample.sample_rate
 
         return sample
 
@@ -228,9 +200,10 @@ class Audio:
         self,
         window="hann",
         window_size: int = 8192,
-        nfft: int = 4096,
+        nfft: int = 8192,
         noverlap: int = 4096,
         nperseg: int = 8192,
+        method="datetime"
     ) -> tuple:
         """
         Generates spectrogram of audio
@@ -255,6 +228,7 @@ class Audio:
             nperseg=nperseg,
             start=self.start,
             end=self.end,
+            method=method
         )
 
         return time, frequency, Pxx
@@ -263,16 +237,16 @@ class Audio:
         self,
         window="hann",
         window_size: int = 8192,
-        nfft: int = 4096,
+        nfft: int = 8192,
         noverlap: int = 4096,
         nperseg: int = 8192,
         zmin: int = None,
         zmax: int = None,
         gain: int = 0,
         showscale: bool = False,
-        datetime=True,
         cmap="jet",
         aspect="auto",
+        method="datetime"
     ):
         fig, ax = plt.subplots()
 
@@ -291,15 +265,24 @@ class Audio:
         if zmax == None:
             zmax = Pxx.max()
 
-        if datetime == True:
-            extents = [self.start, self.end, frequency.min(), frequency.max()]
-        else:
+        if method == "seconds": 
             extents = [
                 self.data["time [s]"].min(),
                 self.data["time [s]"].max(),
                 frequency.min(),
                 frequency.max(),
             ]
+        elif method == "ms":
+            extents = [
+                self.data["time [ms]"].min(),
+                self.data["time [ms]"].max(),
+                frequency.min(),
+                frequency.max(),
+            ]
+        elif method == "samples": 
+            extents = [0, len(self.data), frequency.min(), frequency.max()]
+        else:
+            extents = [self.start, self.end, frequency.min(), frequency.max()]
 
         axi = ax.imshow(
             Pxx,
@@ -312,11 +295,19 @@ class Audio:
 
         ax.set_ylabel("Frequency [Hz]")
 
-        if datetime == True:
-            ax.set_xlim([self.data.datetime.iloc[0], self.data.datetime.iloc[-1]])
-        else:
+        if method == "seconds":
             ax.set_xlabel("Time [s]")
-            ax.set_xlim(0, self.length)
+            ax.set_xlim(self.data["time [s]"].min(), self.data["time [s]"].max())
+        elif method == "ms":
+            ax.set_xlabel("Time [ms]")
+            ax.set_xlim(self.data["time [ms]"].min(), self.data["time [ms]"].max())
+        elif method == "samples":
+            ax.set_xlabel("Samples")
+            ax.set_xlim(0, len(self.data))
+        else: 
+            ax.set_xlim([self.data.datetime.iloc[0], self.data.datetime.iloc[-1]])
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M:%S"))
+            # ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=2))
 
         if showscale:
             cbar = fig.colorbar(
@@ -448,7 +439,7 @@ class Audio:
         frequency, power = self.psd(window_size=window_size)
 
         fig, ax = plt.subplots()
-        ax.plot(frequency, power)
+        ax.plot(frequency[1:], power)
         ax.set_xlabel("Frequency [Hz]")
         ax.set_ylabel("Power [dB]")
 
@@ -544,6 +535,7 @@ def spectrogram(
     nfft: int = 4096,
     noverlap: int = 4096,
     nperseg: int = 8192,
+    method: str = "datetime",
     start: datetime = None,
     end: datetime = None,
 ) -> tuple:
@@ -582,12 +574,19 @@ def spectrogram(
         mode="psd",
     )
 
-    if start:
-        if end == None:
-            end = start + timedelta(seconds=len(data) / sample_rate)
-        datetime = pd.date_range(start, end, periods=len(time))
+    if method == "datetime": 
+        if start:
+            if end == None:
+                end = start + timedelta(seconds=len(data) / sample_rate)
+            datetime = pd.date_range(start, end, periods=len(time))
 
-        time = datetime
+            time = datetime
+    elif method == "samples":
+        time = time * sample_rate
+    elif method == "ms":
+        time = time * 1000
+    elif method == "seconds":
+        time = time
 
     return time, frequency, Pxx
 

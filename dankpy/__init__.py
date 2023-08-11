@@ -7,7 +7,7 @@ from .file import *
 from .graph import * 
 from .mapping import * 
 from .math import *
-from .regression import * 
+from .functions import * 
 from .units import * 
 from .utilities import * 
 from .dankframe import *

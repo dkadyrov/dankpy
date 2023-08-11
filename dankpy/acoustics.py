@@ -1,10 +1,12 @@
 import math
 import numpy as np
 import pandas as pd
+from dankpy.functions import sigmoid
 from numpy import pi, polymul
-from scipy.signal import medfilt
-from scipy.signal import bilinear
+from scipy.signal import medfilt, bilinear, convolve, istft, stft
 
+## 1 atm in Pa
+ps0 = 1.01325e5
 
 def A_weighting(fs):
     """Design of an A-weighting filter.
@@ -31,10 +33,6 @@ def A_weighting(fs):
     # Use the bilinear transformation to get the digital filter.
     # (Octave, MATLAB, and PyLab disagree about Fs vs 1/Fs)
     return bilinear(NUMs, DENs, fs)
-
-
-## 1 atm in Pa
-ps0 = 1.01325e5
 
 
 def absorption(f, t=20, rh=60, ps=ps0):
@@ -272,3 +270,254 @@ def ground_effect(c, hr, hs, hrange, f, sigmae):
     amp = amp.replace(np.nan, 0)
 
     return amp
+
+
+def interpolate_frequency_mask(
+    sample_rate: int, nfft: int, interp_freq_mask: list
+) -> np.array:
+    """
+    Interpolate the frequency mask and make it the same size as the stft, assuming the mask is one-sided
+
+    Args:
+        sample_rate (int): sample rate
+        nfft (int): fft size
+        interp_freq_mask (list): frequency mask to interpolate, a list of tuples [(freq, amplitude), ...]
+
+    Returns:
+        np.array: interpolated frequency mask
+    """
+
+    # make one-sided frequency range
+    freqs = np.linspace(0, sample_rate / 2, nfft // 2 + 1)
+    x = np.array([e[0] for e in interp_freq_mask])
+    y = np.array([e[1] for e in interp_freq_mask])
+    return np.interp(freqs, x, y)
+
+
+def denoising_mask(
+    absolute_stft: int,
+    sample_rate: int,
+    hop_length: int,
+    time_constant: int,
+    thresh_n_mult_nonstationary: int,
+    sigmoid_slope_nonstationary: int,
+) -> int:
+    """
+    Denoising mask for the non-stationary case
+
+    Args:
+        absolute_stft (int):  absolute value of the signal stft
+        sample_rate (int): sample rate
+        hop_length (int): hop length, must be smaller than nfft
+        time_constant (int): time constant of smoothing in seconds
+        thresh_n_mult_nonstationary (int): threshold multiplier for non-stationary signal
+        sigmoid_slope_nonstationary (int): slope of sigmoid for non-stationary signal
+
+    Returns:
+        int: denoising mask
+    """
+
+    # fir convolve a hann window to smooth the signal
+    time_constant_in_frames = int(time_constant * sample_rate / hop_length)
+    smothing_win = np.hanning(time_constant_in_frames * 2 + 1)
+    smothing_win /= np.sum(smothing_win)
+    smothing_win = np.expand_dims(smothing_win, 0)
+
+    sig_stft_smooth = convolve(absolute_stft, smothing_win, mode="same")
+
+    # get the number of X above the mean the signal is
+    sig_mult_above_thresh = (absolute_stft - sig_stft_smooth) / sig_stft_smooth
+
+    # mask based on sigmoid
+    sig_mask = sigmoid(
+        sig_mult_above_thresh, -thresh_n_mult_nonstationary, sigmoid_slope_nonstationary
+    )
+    return sig_mask
+
+
+def spectral_gating_nonstationary(
+    signal: np.array,
+    sample_rate: int,
+    nfft: int = 1024,
+    hop_length: int = 256,
+    prop_decrease: int = 0.95,
+    time_constant: int = 2,
+    thresh_n_mult_nonstationary: int = 2,
+    sigmoid_slope_nonstationary: int = 10,
+    analytic_signal: bool = False,
+    debug: bool = False,
+    interp_freq_mask: int = None,
+) -> np.array:
+    """
+    Non-stationary version of spectral gating using FIR for smoothing
+
+    Args:
+        signal (np.array): input signal
+        sample_rate (int): sample rate
+        nfft (int, optional): fft size. Defaults to 1024.
+        hop_length (int, optional): _description_. Defaults to 256.
+        prop_decrease (int, optional): _description_. Defaults to 0.95.
+        time_constant (int, optional): _description_. Defaults to 2.
+        threshold_n_multiplier_nonstationary (int, optional): threshold multiplier for non-stationary signal. Defaults to 2.
+        sigmoid_slope_nonstationary (int, optional): slope of sigmoid for non-stationary signal. Defaults to 10.
+        analytic_signal (bool, optional): return analytic signal instead of real signal. Defaults to False.
+        debug (bool, optional): return mask and denoised stft as well. Defaults to False.
+        interp_freq_mask (int, optional): frequency mask to interpolate, a list of tuples [(freq, amplitude), ...]. Defaults to None.
+
+    Returns:
+        np.array: denoised signal, if debug is true, also return mask and denoised stft
+    """
+
+    f, t, sig_stft = stft(
+        signal,
+        fs=sample_rate,
+        nfft=nfft,
+        nperseg=nfft,
+        noverlap=(nfft - hop_length),
+    )
+
+    if interp_freq_mask is not None:
+        additional_mask = interpolate_frequency_mask(
+            sample_rate, nfft, interp_freq_mask
+        )
+
+    # get abs of signal stft
+    abs_sig_stft = np.abs(sig_stft)
+
+    # make the sigmoid mask
+    sig_mask = denoising_mask(
+        abs_sig_stft,
+        sample_rate=sample_rate,
+        hop_length=hop_length,
+        time_constant=time_constant,
+        thresh_n_mult_nonstationary=thresh_n_mult_nonstationary,
+        sigmoid_slope_nonstationary=sigmoid_slope_nonstationary,
+    )
+
+    # apply the mask and decrease the signal by a proportion
+    sig_mask = sig_mask * prop_decrease + np.ones(np.shape(sig_mask)) * (
+        1.0 - prop_decrease
+    )
+
+    # multiply signal with mask
+    sig_stft_denoised = sig_stft * sig_mask
+
+    if interpolate_frequency_mask is not None:
+        # apply additional mask
+        sig_stft_denoised *= np.expand_dims(additional_mask, 1)
+
+    # invert/recover the signal
+    if not analytic_signal:
+        # return real signal
+        t, denoised_signal = istft(
+            sig_stft_denoised,
+            fs=sample_rate,
+            nfft=nfft,
+            nperseg=nfft,
+            noverlap=(nfft - hop_length),
+            input_onesided=True,
+        )
+    else:
+        # return analytic signal instead
+
+        # the analytic signal stft is the original stft with the negative frequencies zeroed out
+        # so we pad the original stft with zeros and then take the ifft, using it as the two-sided stft
+        analytic_signal_stft = np.zeros(
+            (sig_stft_denoised.shape[0] * 2 - 2, sig_stft_denoised.shape[1]),
+            dtype=sig_stft_denoised.dtype,
+        )
+        analytic_signal_stft[: sig_stft_denoised.shape[0], :] = sig_stft_denoised
+
+        t, denoised_signal = istft(
+            analytic_signal_stft,
+            fs=sample_rate,
+            nfft=nfft,
+            nperseg=nfft,
+            noverlap=(nfft - hop_length),
+            input_onesided=False,
+        )
+
+    if len(denoised_signal) > len(signal):
+        # trim the signal to the original length
+        denoised_signal = denoised_signal[: len(signal)]
+
+    if debug:
+        return denoised_signal, sig_mask, sig_stft_denoised
+    else:
+        return denoised_signal
+
+
+class AccumulateChunk:
+    def __init__(self, chunk_size, padding):
+        self.chunk_size = chunk_size
+        self.padding = padding * 2
+        self.data = np.zeros((0, 0))
+
+    def new_data(self, new_data):
+        if len(new_data.shape) == 1:
+            new_data = np.expand_dims(new_data, 1)
+        if self.data.shape[1] != new_data.shape[1]:
+            self.data = new_data
+        else:
+            self.data = np.concatenate((self.data, new_data))
+        pass
+
+    def available(self):
+        return len(self.data) > self.chunk_size + self.padding * 2
+
+    def get_chunk(self):
+        if not self.available():
+            raise ValueError("Not enough data to get chunk")
+        padded_chunk = self.data[: self.chunk_size + self.padding * 2, :]
+        self.data = self.data[self.chunk_size :, :]
+        
+        return padded_chunk
+
+class OnlineDenoiser:
+    def __init__(self, chunk_duration=2, time_constant=2, sr=24000) -> None:
+        self.time_constant = time_constant
+        self.chunk_duration = chunk_duration
+        self.sr = sr
+        self._change_params()
+
+    def _change_params(self, time_constant=None, sr=None, chunk_duration=None):
+        if time_constant is not None:
+            self.time_constant = time_constant
+        if sr is not None:
+            self.sr = sr
+        if chunk_duration is not None:
+            self.chunk_duration = chunk_duration
+        self.ac = AccumulateChunk(
+            self.sr * self.chunk_duration, padding=self.sr * self.time_constant
+        )
+        self.out_ac = AccumulateChunk(self.sr * self.chunk_duration, padding=0)
+
+    def new_data(self, new_data):
+        self.ac.new_data(new_data)
+        if self.ac.available():
+            chunk = self.ac.get_chunk()
+
+            # iterate over channels
+            out_chunk = np.zeros_like(chunk)
+            for i in range(chunk.shape[1]):
+                out_chunk[:, i] = spectral_gating_nonstationary(
+                    chunk[:, i], self.sr, self.time_constant
+                )
+
+            # remove padding
+            valid_out_chunk = out_chunk[
+                self.sr * self.time_constant : -self.sr * self.time_constant, :
+            ]
+            self.out_ac.new_data(valid_out_chunk)
+
+    def available(self):
+        return self.out_ac.available()
+
+    def get_chunk(self):
+        return self.out_ac.get_chunk()
+
+    def get_everything(self):
+        out = self.out_ac.data
+        self.out_ac.data = np.zeros((0, 0))
+
+        return out
