@@ -397,17 +397,20 @@ class Audio:
         if method == "seconds":
             ax.plot(self.data["time [s]"], self.data.signal)
             ax.set_xlabel("Time [s]")
+            ax.set_xlim(self.data["time [s]"].min(), self.data["time [s]"].max())
 
         if method == "ms":
             ax.plot(self.data["time [ms]"], self.data.signal)
             ax.set_xlabel("Time [ms]")
+            ax.set_xlim(self.data["time [ms]"].min(), self.data["time [ms]"].max())
 
         if method == "samples":
             ax.plot(self.data.index, self.data.signal)
             ax.set_xlabel("Samples")
-
+            ax.set_xlim(0, len(self.data))
+            
         ax.set_ylabel("Amplitude [a.u.]")
-
+        
         return fig, ax
 
     def psd(self, window_size: int = 4096) -> tuple:
@@ -465,6 +468,26 @@ class Audio:
         else:
             return list(audio)
 
+    def butter_highpass(self, cutoff, order=4, overwrite=False):
+        """
+        Highpass filter using Butterworth filter
+
+        Args:
+            cutoff (int): Cutoff frequency
+            order (int): Order of filter
+
+        Returns:
+            Audio: Filtered audio
+        """
+
+        audio = butter_highpass_filter(self.data.signal, cutoff, self.sample_rate, order)
+
+        if overwrite == True:
+            self.data.signal = audio
+            self.audio = audio
+        else:
+            return list(audio)
+
     def reduce_noise(
         self,
         nfft=2048,
@@ -495,14 +518,10 @@ class Audio:
 
         return data
 
+    def envelope(self):
+        return np.abs(signal.hilbert(self.data.signal))
 
-def butter_lowpass(data, cutoff, fs, order):
-    nyq = 0.5 * fs
-    cutoff = cutoff / nyq
-    b, a = signal.butter(order, cutoff, btype="lowpass", analog=False)
-    y = signal.filtfilt(b, a, data)
 
-    return y
 
 
 def combine_audio(list_of_files):
@@ -525,6 +544,25 @@ def combine_audio(list_of_files):
             combined.data.np.append(Audio(file).data)
 
     return combined
+
+def butter_lowpass(data, cutoff, fs, order):
+    nyq = 0.5 * fs
+    cutoff = cutoff / nyq
+    b, a = signal.butter(order, cutoff, btype="lowpass", analog=False)
+    y = signal.filtfilt(b, a, data)
+
+    return y
+
+def butter_highpass(cutoff, fs, order=5):
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff / nyq
+    b, a = signal.butter(order, normal_cutoff, btype='high', analog=False)
+    return b, a
+
+def butter_highpass_filter(data, cutoff, fs, order=5):
+    b, a = butter_highpass(cutoff, fs, order=order)
+    y = signal.filtfilt(b, a, data)
+    return y
 
 
 def spectrogram(

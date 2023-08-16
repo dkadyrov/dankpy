@@ -49,8 +49,9 @@ class DankFrame(pd.DataFrame):
 
         return self
 
-    def to_latex(self, filepath: str, caption: str, label: str = None) -> None:
-        s = self.style.hide(axis="index").to_latex(
+    def to_latex(self, filepath: str, caption: str, label: str = None, precision:int = 0) -> None:
+
+        s = self.style.hide(axis="index").format(precision=precision).to_latex(
             position="h!",
             position_float="centering",
             caption=caption,
@@ -59,6 +60,12 @@ class DankFrame(pd.DataFrame):
         )
         
         with open(filepath, "w", encoding="utf-8") as f:
+            s = s.replace(r"\centering",r"\footnotesize\centering")
+            # s = s.replace(r"\begin{tabular}", r"\begin{tabularx}{\textwidth}")
+            # s = s.replace(r"r", r"X")
+            # s = s.replace(r"\begin{tabular}",r"\resizebox{\textwidth}{!}{\begin{tabular}")
+            # s = s.replace(r"\end{tabular}",r"\end{tabularx}")
+
             f.write(s)
 
     def to_html(self) -> str:
