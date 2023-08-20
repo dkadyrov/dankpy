@@ -420,12 +420,12 @@ axes.formatter.use_mathtext: True  # When True, use mathtext for scientific
                   # See also https://matplotlib.org/stable/tutorials/intermediate/color_cycle.html
                   # for more details on prop_cycle usage.
 
-axes.prop_cycle : (cycler('color', ['k', 'r', 'b', 'g']) + cycler('ls', ['-', '--', ':', '-.']))
+axes.prop_cycle : (cycler('color', ['k', 'r', 'b', 'g', 'y', 'c']) + cycler('ls', ['-', '--', ':', '-.', '-', '--']))
 
 axes.xmargin:   .05  # x margin.  See `axes.Axes.margins`
 axes.ymargin:   .05  # y margin.  See `axes.Axes.margins`
 axes.zmargin:   .05  # z margin.  See `axes.Axes.margins`
-axes.autolimit_mode: data #round_numbers  # If "data", use axes.xmargin and axes.ymargin as is.
+axes.autolimit_mode: "round_numbers" #round_numbers  # If "data", use axes.xmargin and axes.ymargin as is.
                             # If "round_numbers", after application of margins, axis
                             # limits are further expanded to the nearest "round" number.
 #polaraxes.grid: True  # display grid on polar axes
