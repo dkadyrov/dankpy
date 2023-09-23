@@ -2,7 +2,7 @@ import os
 import re
 from dankpy import dt, dankframe
 import librosa 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class File:
     def init(self, filepath: str):
@@ -202,4 +202,15 @@ def metadatas(filepaths: list, extended=False) -> dankframe.DankFrame:
         pd.DataFrame: metadata of files
     """
 
-    return dankframe.pd.DataFrame([metadata(filepath, extended) for filepath in filepaths])
+    metadatas = dankframe.pd.DataFrame([metadata(filepath, extended) for filepath in filepaths])
+
+    for row, group in metadatas.groupby(["start", "channel"]):
+        if len(group) > 1: 
+            for j, row in group.iterrows():
+                if row.record_number > 1: 
+                    metadatas.at[row.name, "start"] = metadatas.iloc[row.name - 1].end
+                    metadatas.at[row.name, "end"] = metadatas.iloc[
+                                row.name
+                            ].start + timedelta(seconds=row.duration)
+                
+    return metadatas

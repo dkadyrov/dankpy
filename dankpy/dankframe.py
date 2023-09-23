@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def read_list(list_of_dicts: list) -> pd.DataFrame:
+def from_list(list_of_dicts: list) -> pd.DataFrame:
     """
     Converts a list of dictionaries to pandas Dataframe object with keys as columns
 
@@ -18,7 +18,7 @@ class DankFrame(pd.DataFrame):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def read_list(self, list_of_dicts: list) -> pd.DataFrame:
+    def from_list(self, list_of_dicts: list) -> pd.DataFrame:
         """
         Converts a list of dictionaries to pandas Dataframe object with keys as columns
 

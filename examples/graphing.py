@@ -1,5 +1,5 @@
 #%%
-from dankpy.graph import graph 
+from dankpy.dankly import graph 
 
 # Initialize the graph
 fig = graph()

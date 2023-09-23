@@ -4,7 +4,7 @@ from .audio import *
 from .color import * 
 from .dt import * 
 from .file import *
-from .graph import * 
+from .dankly import * 
 from .mapping import * 
 from .math import *
 from .functions import * 

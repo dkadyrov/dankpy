@@ -1,5 +1,5 @@
 from copy import deepcopy
-from dankpy import graph, dt, file
+from dankpy import dankly, dt, file
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -184,9 +184,13 @@ class Audio:
             sample_rate (int): Sample rate to resample audio to
         """
 
-        self.audio = librosa.resample(
-            self.audio, orig_sr=self.sample_rate, target_sr=sample_rate
-        )
+        try: 
+            self.audio = librosa.resample(
+                self.audio, orig_sr=self.sample_rate, target_sr=sample_rate
+            )
+        except: 
+            self.audio = [0]*int(self.duration)*int(sample_rate)
+
         self.sample_rate = sample_rate
         self.data = pd.DataFrame()
         self.end = self.start + timedelta(seconds=len(self.audio) / self.sample_rate)
