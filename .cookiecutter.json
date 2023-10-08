@@ -1,0 +1,16 @@
+{
+  "_checkout": "2022.6.3",
+  "_output_dir": "D:\\daniel\\Documents\\software\\dankpy",
+  "_repo_dir": "C:\\Users\\daniel\\.cookiecutters\\cookiecutter-hypermodern-python",
+  "_template": "gh:cjolowicz/cookiecutter-hypermodern-python",
+  "author": "Daniel Kadyrov",
+  "copyright_year": "2023",
+  "development_status": "Development Status :: 3 - Alpha",
+  "email": "daniel.kadyrov@gmail.com",
+  "friendly_name": "DANKPY",
+  "github_user": "dkadyrov",
+  "license": "MIT",
+  "package_name": "dankpy",
+  "project_name": "dankpy",
+  "version": "0.0.1"
+}

@@ -13,7 +13,7 @@ import librosa
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-import noisereduce as nr
+import dankpy.noisereduce as nr
 import os
 import pandas as pd
 import plotly.graph_objs as go
@@ -320,75 +320,6 @@ class Audio:
 
         return fig, ax
 
-    # def spectrograph(
-    #     self,
-    #     window_size: int = 8192,
-    #     nfft: int = 4096,
-    #     noverlap: int = 4096,
-    #     nperseg: int = 8192,
-    #     zmin: int = None,
-    #     zmax: int = None,
-    #     correction: int = 0,
-    #     showscale: bool = False,
-    # ) -> graph.Figure:
-    #     """
-    #     Generates spectrograph of audio
-
-    #     Args:
-    #         window_size (int, optional): Window size in samples. Defaults to 8192.
-    #         nfft (int, optional): FFT number. Defaults to 4096.
-    #         noverlap (int, optional): Overlap amount in samples. Defaults to 4096.
-    #         nperseg (int, optional): Number of samples per segment. Defaults to 8192.
-    #         zmin (int, optional): Minimum Z value for graph. Defaults to None.
-    #         zmax (int, optional): Maximum Z value for graph. Defaults to None.
-    #         correction (int, optional): dB correction. Defaults to 0.
-
-    #     Returns:
-    #         graph.Figure: Spectrograph
-    #     """
-
-    #     time, frequency, Pxx = self.spectrogram(
-    #         window_size=window_size, nfft=nfft, noverlap=noverlap, nperseg=nperseg
-    #     )
-
-    #     fig = spectrograph(
-    #         time,
-    #         frequency,
-    #         Pxx,
-    #         colorscale="Jet",
-    #         zmin=zmin,
-    #         zmax=zmax,
-    #         correction=correction,
-    #         showscale=showscale,
-    #     )
-
-    #     return fig
-
-    # def waveform(self) -> graph.Figure:
-    #     """
-    #     Generates signal graph
-
-    #     Returns:
-    #         graph.Figure: Signal graph
-    #     """
-    #     # register_plotly_resampler(mode='auto')
-
-    #     fig = graph.Figure()
-    #     # fig = FigureResampler(fig)
-    #     fig.add_trace(
-    #         go.Scatter(
-    #             x=self.data.datetime,
-    #             y=self.data.signal,
-    #         )
-    #     )
-
-    #     fig.update_layout(
-    #         yaxis_title="Signal [a.u.]",
-    #         yaxis_range=[-1.5, 1.5],
-    #     )
-
-    #     return fig
-
     def plot_waveform(self, method: str = "datetime"):
         fig, ax = plt.subplots()
 
@@ -524,8 +455,6 @@ class Audio:
 
     def envelope(self):
         return np.abs(signal.hilbert(self.data.signal))
-
-
 
 
 def combine_audio(list_of_files):
