@@ -26,6 +26,15 @@ setup(
         "xlrd",
         "kaleido==0.1.0post1",
         "ffmpeg",
-        "openpyxl"
+        "openpyxl",
+        "sqlalchemy",
+        "sqlalchemy-utils",
+        "scikit-learn", 
+        "docx", 
+        "statsmodels",
+        "dateutil",
+
+
+
     ],
 )
