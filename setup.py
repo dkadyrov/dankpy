@@ -32,9 +32,6 @@ setup(
         "scikit-learn", 
         "docx", 
         "statsmodels",
-        "dateutil",
-
-
-
+        "python-dateutil",
     ],
 )
