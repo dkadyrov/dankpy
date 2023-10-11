@@ -16,7 +16,7 @@ setup(
         "glob2",
         "librosa",
         "vincenty",
-        "matplotlib",
+        "matplotlib==3.7.0",
         "plotly",
         "soundfile",
         "scipy",
