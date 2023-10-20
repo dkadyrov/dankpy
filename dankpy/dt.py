@@ -116,7 +116,7 @@ def write_date(date, seperator: str = "-") -> str:
     return date.strftime(f"%Y{seperator}%m{seperator}%d")
 
 
-def write_datetime(dt, seperator: str = "-", milliseconds: bool = False, directory=False) -> str:
+def write_datetime(dt, seperator: str = "-", ms: bool = False, directory=False) -> str:
     """
     Writes datetime in YYYY-MM-DD HH:MM:SS format
 
@@ -128,7 +128,14 @@ def write_datetime(dt, seperator: str = "-", milliseconds: bool = False, directo
     Returns:
         str: Datetime in YYYY-MM-DD HH:MM:SS format
     """
-    if directory: 
-        return dt.strftime(f"%Y{seperator}%m{seperator}%d{seperator}%H{seperator}%M{seperator}%S.%f")
 
-    return dt.strftime(f"%Y{seperator}%m{seperator}%d %H:%M:%S.%f")
+    if directory: 
+        if ms: 
+            return dt.strftime(f"%Y{seperator}%m{seperator}%d{seperator}%H{seperator}%M{seperator}%S.%f")
+        else: 
+            return dt.strftime(f"%Y{seperator}%m{seperator}%d{seperator}%H{seperator}%M{seperator}%S")
+
+    if ms:
+        return dt.strftime(f"%Y{seperator}%m{seperator}%d %H:%M:%S.%f")
+    else:
+        return dt.strftime(f"%Y{seperator}%m{seperator}%d %H:%M:%S")

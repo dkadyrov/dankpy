@@ -416,7 +416,37 @@ class Audio:
         ax.set_ylabel("Amplitude [a.u.]")
         
         return fig, ax
+    
+    def plot_envelope(self, method: str = "datetime"):
+        fig, ax = plt.subplots()
 
+    
+
+        if method == "datetime":
+            ax.plot(self.data.datetime, self.envelope)
+            ax.set_xlim(self.start, self.end)
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M:%S"))
+            ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=2))
+
+        if method == "seconds":
+            ax.plot(self.data["time [s]"], self.envelope)
+            ax.set_xlabel("Time [s]")
+            ax.set_xlim(self.data["time [s]"].min(), self.data["time [s]"].max())
+
+        if method == "ms":
+            ax.plot(self.data["time [ms]"], self.envelope)
+            ax.set_xlabel("Time [ms]")
+            ax.set_xlim(self.data["time [ms]"].min(), self.data["time [ms]"].max())
+
+        if method == "samples":
+            ax.plot(self.data.index, self.envelope)
+            ax.set_xlabel("Samples")
+            ax.set_xlim(0, len(self.data))
+            
+        ax.set_ylabel("Amplitude [a.u.]")
+        
+        return fig, ax
+    
     def psd(self, window_size: int = 4096) -> tuple:
         """
         Generates the power spectral density of the audio
@@ -524,6 +554,21 @@ class Audio:
 
     def envelope(self):
         return np.abs(signal.hilbert(self.data.signal))
+
+    def write_audio(self, filepath: str) -> None:
+        """
+        Writes audiofile of data with set samplerate. Omit extension, will output only wav.
+
+        Args:
+            data (list or pd.Series): data to output
+            filepath (str): filepath of output
+            sample_rate (int): desired file sample rate
+        """
+        if ".wav" not in filepath: 
+            filepath = filepath + ".wav"
+
+        sf.write(filepath, self.data.signal, self.sample_rate)
+
 
 
 
@@ -727,3 +772,23 @@ def psd(x: list or pd.Series, sample_rate: int, window_size: int = 4096) -> tupl
     w1 = sample_rate * w / window_size
 
     return w1, lp
+
+# %%
+def peak_hold(data, window=8*1024, sample_rate=24000):
+    df = pd.DataFrame()
+    samples = 0 
+    while samples < sample_rate * len(data): 
+        d = data[samples:samples+window]
+        if len(d) < window:
+            break
+        # freq, amp = audio.psd(d, sample_rate=sample_rate, window_size=sample_size)
+        freq, amp = signal.periodogram(d, fs=sample_rate, window=signal.windows.blackmanharris(window), scaling="spectrum")
+        amp = 10*np.log10(amp)
+        if "frequency" not in df.columns:
+            df["frequency"] = freq
+        if "amplitude" not in df.columns:
+            df["amplitude"] = amp
+        else: 
+            df["amplitude"] = [amp[i] if amp[i] > df.amplitude[i] else df.amplitude[i] for i in range(len(amp))]
+        samples += window
+    return df
