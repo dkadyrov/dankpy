@@ -198,6 +198,8 @@ class Audio:
         self.data["datetime"] = pd.date_range(
             start=self.start, end=self.end, periods=len(self.audio)
         )
+        self.data["time [s]"] = self.data.index/self.sample_rate
+        self.data["time [ms]"] = self.data["time [s]"] * 1000
         self.data["signal"] = self.audio
 
     def spectrogram(
@@ -476,7 +478,7 @@ class Audio:
         frequency, power = self.psd(window_size=window_size)
 
         fig, ax = plt.subplots()
-        ax.plot(frequency[1:], power)
+        ax.plot(frequency, power)
         ax.set_xlabel("Frequency [Hz]")
         ax.set_ylabel("Power [dB]")
 
@@ -494,7 +496,7 @@ class Audio:
             Audio: Filtered audio
         """
 
-        audio = butter_lowpass(self.data.signal, cutoff, self.sample_rate, order)
+        audio = butter_lowpass_filter(self.data.signal, cutoff, self.sample_rate, order)
 
         if overwrite == True:
             self.data.signal = audio
@@ -617,7 +619,7 @@ def combine_audio(list_of_files):
 
     return combined
 
-def butter_lowpass(data, cutoff, fs, order):
+def butter_lowpass(cutoff, fs, order):
     nyq = 0.5 * fs
     cutoff = cutoff / nyq
     b, a = signal.butter(order, cutoff, btype="lowpass", analog=False)
@@ -644,19 +646,20 @@ def butter_highpass_filter(data, cutoff, fs, order=5):
     return y
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
-    nyq = 0.5 * fs
-    lowcut = lowcut / nyq
-    highcut = highcut / nyq
-   
-    b, a = signal.butter(order, [lowcut, highcut], fs=fs, btype='band', analog=False)
-
+    nyq = 0.5*fs
+    low = lowcut / nyq
+    high = highcut / nyq
+    b, a = signal.butter(order, [low, high], btype='bandpass')
+    
     return b, a
+
 
 def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
     b, a = butter_bandpass(lowcut, highcut, fs, order=order)
-    y = signal.filtfilt(b, a, data)
+    y = signal.lfilter(b, a, data)
     
     return y
+
 
 def spectrogram(
     data: list or pd.Series,
@@ -794,28 +797,47 @@ def mp3_to_wav(input: str, output: str, output_format: str = "wav") -> None:
     sound.export(output, format=output_format)
 
 
-def psd(x: list or pd.Series, sample_rate: int, window_size: int = 4096) -> tuple:
-    """
-    Compute the power spectral density of a signal.
+# def psd(x: list or pd.Series, sample_rate: int, window_size: int = 4096) -> tuple:
+#     """
+#     Compute the power spectral density of a signal.
 
-    Args:
-        x (array): signal
-        sample_rate (int): sample rate of the signal
-        sample_window (int, optional): length of the window to use for the FFT. Defaults to 4096.
+#     Args:
+#         x (array): signal
+#         sample_rate (int): sample rate of the signal
+#         sample_window (int, optional): length of the window to use for the FFT. Defaults to 4096.
 
-    Returns:
-        tuple: power spectral density
-    """
+#     Returns:
+#         tuple: power spectral density
+#     """
 
-    f = np.fft.rfft(x)
-    f1 = f[0 : int(window_size / 2)]
-    pf1 = 2 * np.abs(f1 * np.conj(f1)) / (sample_rate * window_size)
-    lpf1 = 10 * np.log10(pf1)
-    w = np.arange(1, window_size / 2 + 1)
-    lp = lpf1[1 : int(window_size / 2)]
-    w1 = sample_rate * w / window_size
+#     f = np.fft.rfft(x)
+#     f1 = f[0 : int(window_size / 2)]
+#     pf1 = 2 * np.abs(f1 * np.conj(f1)) / (sample_rate * window_size)
+#     lpf1 = 10 * np.log10(pf1)
+#     w = np.arange(1, window_size / 2 + 1)
+#     lp = lpf1[1 : int(window_size / 2)]
+#     w1 = sample_rate * w / window_size
 
-    return w1, lp
+#     return w1, lp
+
+def psd(x: list or pd.Series, sample_rate: int, window_size: int = 4096, window: str ="blackmanharris", scaling: str ="spectrum") -> tuple:
+    if window == "blackmanharris":
+        window = signal.windows.blackmanharris(window_size)
+    elif window == "hann":
+        window = signal.windows.hann(window_size)
+    elif window == "hamming":
+        window = signal.windows.hamming(window_size)
+    elif window == "bartlett":
+        window = signal.windows.bartlett(window_size)
+    elif window == "blackman":
+        window = signal.windows.blackman(window_size)
+    elif window == "boxcar":
+        window = signal.windows.boxcar(window_size)
+    
+    freq, amp = signal.periodogram(x, fs=sample_rate, window=window, scaling=scaling)
+    amp = 10*np.log10(amp)
+
+    return freq, amp
 
 # %%
 def peak_hold(data, window=8*1024, sample_rate=24000):
