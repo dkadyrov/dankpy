@@ -425,23 +425,23 @@ class Audio:
     
 
         if method == "datetime":
-            ax.plot(self.data.datetime, self.envelope)
+            ax.plot(self.data.datetime, self.envelope())
             ax.set_xlim(self.start, self.end)
             ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M:%S"))
             ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=2))
 
         if method == "seconds":
-            ax.plot(self.data["time [s]"], self.envelope)
+            ax.plot(self.data["time [s]"], self.envelope())
             ax.set_xlabel("Time [s]")
             ax.set_xlim(self.data["time [s]"].min(), self.data["time [s]"].max())
 
         if method == "ms":
-            ax.plot(self.data["time [ms]"], self.envelope)
+            ax.plot(self.data["time [ms]"], self.envelope())
             ax.set_xlabel("Time [ms]")
             ax.set_xlim(self.data["time [ms]"].min(), self.data["time [ms]"].max())
 
         if method == "samples":
-            ax.plot(self.data.index, self.envelope)
+            ax.plot(self.data.index, self.envelope())
             ax.set_xlabel("Samples")
             ax.set_xlim(0, len(self.data))
             
