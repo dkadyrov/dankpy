@@ -424,7 +424,7 @@ axes.formatter.use_mathtext: True  # When True, use mathtext for scientific
                   # See also https://matplotlib.org/stable/tutorials/intermediate/color_cycle.html
                   # for more details on prop_cycle usage.
 
-# axes.prop_cycle : (cycler('color', ['k', 'r', 'b', 'g', 'y', 'c']) + cycler('ls', ['-', '--', ':', '-.', '-', '--']))
+axes.prop_cycle : (cycler('color', ['k', 'r', 'b', 'g', 'y', 'c']) + cycler('ls', ['-', '--', ':', '-.', '-', '--']))
 
 axes.xmargin:   .05  # x margin.  See `axes.Axes.margins`
 axes.ymargin:   .05  # y margin.  See `axes.Axes.margins`

@@ -50,7 +50,7 @@ class Audio:
         if isinstance(start, datetime):
             self.start = start
         else:
-            if start == None:
+            if start is None:
                 try:
                     self.start = dt.read_datetime(self.filename[:23])
                 except:
@@ -124,14 +124,14 @@ class Audio:
                 except:
                     start = start
 
-            if end == None:
+            if end is None:
                 if isinstance(start, datetime):
                     end = start + timedelta(seconds=length)
             else:
                 if not isinstance(end, datetime):
                     end = dt.read_datetime(end)
 
-            if length == None:
+            if length is None:
                 length = (end - start).total_seconds()
 
             sample.data = sample.data.loc[
@@ -139,14 +139,14 @@ class Audio:
             ]
 
         if method == "samples":
-            if end == None:
+            if end is None:
                 end = start + length
 
             sample = deepcopy(self)
             sample.data = sample.data.loc[start:end]
 
         if method == "seconds":
-            if end == None:
+            if end is None:
                 end = start + length
 
             sample.data = sample.data.loc[
@@ -154,7 +154,7 @@ class Audio:
             ]
 
         if method == "ms":
-            if end == None:
+            if end is None:
                 end = start + length
 
             sample.data = sample.data.loc[
@@ -266,9 +266,9 @@ class Audio:
 
         Pxx = 10 * np.log10(Pxx) + gain
 
-        if zmin == None:
+        if zmin is None:
             zmin = Pxx.min()
-        if zmax == None:
+        if zmax is None:
             zmax = Pxx.max()
 
         if method == "seconds": 
@@ -303,10 +303,10 @@ class Audio:
 
         if method == "seconds":
             ax.set_xlabel("Time [s]")
-            ax.set_xlim(self.data["time [s]"].min(), self.data["time [s]"].max())
+            ax.set_xlim(self.data["time [s]"].min(), round(self.data["time [s]"].max()))
         elif method == "ms":
             ax.set_xlabel("Time [ms]")
-            ax.set_xlim(self.data["time [ms]"].min(), self.data["time [ms]"].max())
+            ax.set_xlim(self.data["time [ms]"].min(), round(self.data["time [ms]"].max()))
         elif method == "samples":
             ax.set_xlabel("Samples")
             ax.set_xlim(0, len(self.data))
@@ -317,7 +317,7 @@ class Audio:
 
         if showscale:
             cbar = fig.colorbar(
-                axi, location="right", label="Amplitude [a.u.]", ticks=[zmin, zmax]
+                axi, location="right", ticks=[zmin, zmax]
             )
 
         return fig, ax
@@ -498,7 +498,7 @@ class Audio:
 
         audio = butter_lowpass_filter(self.data.signal, cutoff, self.sample_rate, order)
 
-        if overwrite == True:
+        if overwrite is True:
             self.data.signal = audio
             self.audio = audio
         else:
@@ -518,7 +518,7 @@ class Audio:
 
         audio = butter_highpass_filter(self.data.signal, cutoff, self.sample_rate, order)
 
-        if overwrite == True:
+        if overwrite is True:
             self.data.signal = audio
             self.audio = audio
         else:
@@ -541,7 +541,7 @@ class Audio:
             self.data.signal, lowcut, highcut, self.sample_rate, order
         )
 
-        if overwrite == True:
+        if overwrite is True:
             self.data.signal = audio
             self.audio = audio
         else:
@@ -611,11 +611,11 @@ def combine_audio(list_of_files):
 
     combined = None
 
-    for file in list_of_files:
-        if combined == None:
-            combined = Audio(file)
+    for f in list_of_files:
+        if combined is None:
+            combined = Audio(f)
         else:
-            combined.data.np.append(Audio(file).data)
+            combined.data.np.append(Audio(f).data)
 
     return combined
 
@@ -710,7 +710,7 @@ def spectrogram(
 
     if method == "datetime": 
         if start:
-            if end == None:
+            if end is None:
                 end = start + timedelta(seconds=len(data) / sample_rate)
             datetime = pd.date_range(start, end, periods=len(time))
 
