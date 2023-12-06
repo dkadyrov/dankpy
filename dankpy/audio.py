@@ -1,34 +1,24 @@
 from copy import deepcopy
-from dankpy import dankly, dt, file
+from dankpy import dt, file
 from datetime import datetime, timedelta
-
 import numpy as np
-
-np.seterr(divide="ignore")
-
 from pydub import AudioSegment
 from scipy import signal
 import librosa
-
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-
 import noisereduce as nr
 import os
 import pandas as pd
-import plotly.graph_objs as go
 import soundfile as sf
 
-# from plotly_resampler import FigureResampler, FigureWidgetResampler, register_plotly_resampler
-
+np.seterr(divide="ignore")
 valid_audio = ["wav", "flac", "mp3", "ogg", "aiff", "au"]
-
 
 class Audio:
     """
     Audio class for handling audio files
     """
-
     def __init__(self, filepath=None, audio=None, sample_rate=None, start=None):
         if filepath:
             self.filepath = filepath
@@ -53,7 +43,7 @@ class Audio:
             if start is None:
                 try:
                     self.start = dt.read_datetime(self.filename[:23])
-                except:
+                except Exception:
                     self.start = dt.read_datetime("00:00:00")
                 # self.start = dt.read_datetime(start)
             else:
@@ -121,7 +111,7 @@ class Audio:
             if not isinstance(start, datetime):
                 try:
                     start = dt.read_datetime(start)
-                except:
+                except ValueError:
                     start = start
 
             if end is None:
@@ -188,8 +178,10 @@ class Audio:
             self.audio = librosa.resample(
                 self.audio, orig_sr=self.sample_rate, target_sr=sample_rate
             )
-        except: 
+        except Exception as e:
+            print(f"Error: {e}")
             self.audio = [0]*int(self.duration)*int(sample_rate)
+            print(f"An error occurred while resampling audio: {e}")
 
         self.sample_rate = sample_rate
         self.data = pd.DataFrame()
@@ -316,7 +308,7 @@ class Audio:
             # ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=2))
 
         if showscale:
-            cbar = fig.colorbar(
+            cbar = fig.colorbar(  # noqa: F841
                 axi, location="right", ticks=[zmin, zmax]
             )
 

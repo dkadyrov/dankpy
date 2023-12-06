@@ -65,7 +65,7 @@ def circle_intersection(x0:float, y0:float, r0:float, x1:float, y1:float, r1:flo
 
     intersections = []
 
-    if x2 == None:
+    if x2 is None:
         intersections.append([point1_x, point1_y])
         intersections.append([point2_x, point2_y])
 

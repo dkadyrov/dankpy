@@ -63,7 +63,7 @@ def celcius_to_kelvin(c: float) -> float:
 
     Returns:
         float: Kelvin
-    """    
+    """
 
     return c - 273.15
 

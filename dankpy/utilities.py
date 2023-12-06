@@ -1,6 +1,3 @@
-import numpy as np
-from datetime import datetime, timedelta
-import math
 import pandas as pd
 
 
@@ -17,12 +14,8 @@ def round_to_nearest(x: float, base: int = 50) -> float:
     """
     try:
         return base * round(x / base)
-    # if base - x % base <= 10:
-    #     return base * math.ceil(x / base) + base
-    # try:
-    #     return base * math.ceil(x / base)
-    except:
-        print(x)
+    except Exception as e:
+        print(e)
 
 
 def lower_keys(tree: dict) -> dict:

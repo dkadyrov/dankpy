@@ -1,8 +1,5 @@
 import math
-from vincenty import vincenty
-from .utilities import lower_keys
-from numpy import sqrt, cos, sin, absolute, pi, array, dot, rad2deg, deg2rad, interp
-import pandas as pd
+from numpy import cos, absolute, pi
 import numpy as np
 
 

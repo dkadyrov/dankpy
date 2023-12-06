@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from dankpy.functions import sigmoid
 from numpy import pi, polymul
-from scipy.signal import medfilt, bilinear, convolve, istft, stft
+from scipy.signal import medfilt, bilinear, convolve, istft, stft, spectrogram
 
 ## 1 atm in Pa
 ps0 = 1.01325e5
@@ -271,3 +271,43 @@ def ground_effect(c, hr, hs, hrange, f, sigmae):
 
     return amp
 
+def phase_diff(signal1, signal2, freq, win_num, name=None):
+    s1 = signal1[0]
+    fs1 = signal1[1]
+    s2 = signal2[0]
+    fs2 = signal2[1]
+
+    win = np.hanning(win_num)
+    nfft = np.maximum(256, 2**math.ceil(np.log2(win_num)))
+
+    f1, t1, s1s = spectrogram(
+        s1[int(len(s1)/2):], fs1, window=win, nfft=nfft, noverlap=512, mode="complex")
+
+    f2, t2, s2s = spectrogram(
+        s2[int(len(s2)/2):], fs2, window=win, nfft=nfft, noverlap=512, mode="complex")
+
+    ind1 = np.argmin(np.absolute(f1-freq))
+    ind2 = np.argmin(np.absolute(f2-freq))
+
+    cross = s1s * np.conj(s2s)
+
+    sts = np.angle(cross[ind1])
+
+
+    # plt.figure()
+    # plt.plot(t1+15, sts)
+    # plt.title(name + " " + str(freq)+"Hz")
+    # plt.xlabel("Time [s]")
+    # plt.ylabel("Phase Difference [rad]")
+    # plt.savefig("phase_difference\\node3\\"+name+"_"+str(freq)+"Hz"+".png")
+    # plt.clf()
+
+    # plt.figure()
+    # plt.plot(t1+15, sts/(2*np.pi*freq)*1000)
+    # plt.title(name + " " + str(freq)+"Hz")
+    # plt.xlabel("Time [s]")
+    # plt.ylabel("Phase Difference [ms]")
+    # plt.savefig("phase_difference\\node3\\"+name+"_"+str(freq)+"Hz_time.png")
+    # plt.clf()
+
+    return sts, [f1, t1, s1s], [f2, t2, s2s]
