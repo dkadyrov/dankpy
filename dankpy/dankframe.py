@@ -14,6 +14,7 @@ def from_list(list_of_dicts: list) -> pd.DataFrame:
     except:
         return pd.DataFrame(list_of_dicts)
 
+
 class DankFrame(pd.DataFrame):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

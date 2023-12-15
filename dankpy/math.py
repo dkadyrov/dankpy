@@ -1,5 +1,24 @@
 import numpy as np
 
+def golden_ratio(longer=None, shorter=None) -> float:
+    """
+    Calculates golden ratio
+
+    Args:
+        longer (float, optional): longer side of rectangle. Defaults to None.
+        shorter (float, optional): shorter side of rectangle. Defaults to None.
+
+    Returns:
+        float: golden ratio
+    """
+    if longer is None and shorter is None:
+        return (1 + np.sqrt(5)) / 2
+    elif longer is not None and shorter is None:
+        return longer / ((1 + np.sqrt(5)) / 2)
+    elif longer is None and shorter is not None:
+        return shorter * ((1 + np.sqrt(5)) / 2)
+    else:
+        return (longer / shorter) == ((1 + np.sqrt(5)) / 2)
 
 def distance(x1:float, y1:float, x2:float, y2:float) -> float:
     """

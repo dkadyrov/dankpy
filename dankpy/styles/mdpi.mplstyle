@@ -265,7 +265,7 @@ font.serif: "Palatino Linotype"
 #font.variant: normal
 #font.weight:  normal
 #font.stretch: normal
-#font.size:    10.0
+font.size:    8.0
 
 #font.serif:      DejaVu Serif, Bitstream Vera Serif, Computer Modern Roman, New Century Schoolbook, Century Schoolbook L, Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif
 #font.sans-serif: DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif
@@ -369,13 +369,13 @@ axes.linewidth: 1    # edge line width
 #axes.grid.axis:     both    # which axis the grid should apply to
 #axes.grid.which:    major   # grid lines at {major, minor, both} ticks
 #axes.titlelocation: center  # alignment of the title: {left, right, center}
-axes.titlesize: large   # font size of the axes title
+axes.titlesize: 8.0   # font size of the axes title
 #axes.titleweight:   normal  # font weight of title
 #axes.titlecolor:    auto    # color of the axes title, auto falls back to
                              # text.color as default value
 #axes.titley:        None    # position title (axes relative units).  None implies auto
 axes.titlepad:      8.0     # pad between axes and title in points
-axes.labelsize: large  # font size of the x and y labels
+axes.labelsize: 8.0  # font size of the x and y labels
 #axes.labelpad:      4.0     # space between label and axis
 #axes.labelweight:   normal  # weight of the x and y labels
 #axes.labelcolor:    black
@@ -551,7 +551,7 @@ legend.fontsize: medium
 #figure.titleweight: normal    # weight of the figure title
 #figure.labelsize:   large     # size of the figure label (``Figure.sup[x|y]label()``)
 #figure.labelweight: normal    # weight of the figure label
-figure.figsize: 6.5, 2.0  # figure size in inches
+figure.figsize: 5.6, 1.7305315203955498  # figure size in inches
 figure.dpi: 300       # figure dots per inch
 #figure.facecolor:   white     # figure face color
 #figure.edgecolor:   white     # figure edge color
