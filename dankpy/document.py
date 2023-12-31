@@ -21,7 +21,7 @@ def add_dataframe(doc: Document, df: pd.DataFrame):
 
 def add_figure(doc: Document, fig, ax, caption=None, add_break=True):
     memfile = BytesIO()
-    fig.tight_layout()
+    # fig.tight_layout()
     fig.savefig(memfile)
     if caption: 
         doc.add_paragraph(caption)
