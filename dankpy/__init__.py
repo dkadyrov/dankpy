@@ -11,3 +11,4 @@ from .functions import *
 from .units import * 
 from .utilities import * 
 from .dankframe import *
+from .graph import *
