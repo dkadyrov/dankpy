@@ -17,3 +17,10 @@ linestyle = [
     ("loosely dashdotdotted", (0, (3, 10, 1, 10, 1, 10))),
     ("densely dashdotdotted", (0, (3, 1, 1, 1, 1, 1))),
 ]
+
+def get_ax_size(fig, ax):
+    bbox = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+    width, height = bbox.width, bbox.height
+    width *= fig.dpi
+    height *= fig.dpi
+    return width, height
