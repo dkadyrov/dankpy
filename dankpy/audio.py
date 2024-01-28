@@ -611,53 +611,73 @@ def combine_audio(list_of_files):
     return combined
 
 
-def butter_lowpass(cutoff, fs, order):
+def butter_lowpass(cutoff, fs, order, type="sos"):
     nyq = 0.5 * fs
     cutoff = cutoff / nyq
-    b, a = signal.butter(order, cutoff, btype="lowpass", analog=False)
+  
+    if type =="ab":
+        b, a = signal.butter(order, cutoff, btype="lowpass", analog=False)
+        return b, a
+    elif type == "sos":
+        sos = signal.butter(order, cutoff, btype="lowpass", analog=False, output="sos")
+        return sos
 
-    return b, a
+def butter_lowpass_filter(data, cutoff, fs, order=5, type="sos"):
 
-
-def butter_lowpass_filter(data, cutoff, fs, order=5):
-    b, a = butter_lowpass(cutoff, fs, order=order)
-    y = signal.filtfilt(b, a, data)
+    if type == "ab":
+        b, a = butter_lowpass(cutoff, fs, order=order)
+        y = signal.filtfilt(b, a, data)
+    elif type == "sos":
+        sos = butter_lowpass(cutoff, fs, order=order, type="sos")
+        y = signal.sosfiltfilt(sos, data)
 
     return y
 
 
-def butter_highpass(cutoff, fs, order=5):
+def butter_highpass(cutoff, fs, order=5, type="sos"):
     nyq = 0.5 * fs
     normal_cutoff = cutoff / nyq
-    b, a = signal.butter(order, normal_cutoff, btype="high", analog=False)
+    if type == "ab"
+        b, a = signal.butter(order, normal_cutoff, btype="high", analog=False)
+        b, a
+    elif type == "sos":
+        sos = signal.butter(order, normal_cutoff, btype="high", analog=False, output="sos")
 
-    return b, a
+        return sos
 
 
-def butter_highpass_filter(data, cutoff, fs, order=5):
-    b, a = butter_highpass(cutoff, fs, order=order)
-    y = signal.filtfilt(b, a, data)
+def butter_highpass_filter(data, cutoff, fs, order=5, type="sos"):
+    if type == "ab":
+        b, a = butter_highpass(cutoff, fs, order=order)
+        y = signal.filtfilt(b, a, data)
+    elif type == "sos":
+        sos = butter_highpass(cutoff, fs, order=order, type="sos")
+        y = signal.sosfiltfilt(sos, data)
 
     return y
 
 
-def butter_bandpass(lowcut, highcut, fs, order=5):
+def butter_bandpass(lowcut, highcut, fs, order=5, type="sos"):
     nyq = 0.5 * fs
     low = lowcut / nyq
     high = highcut / nyq
-    # b, a = signal.butter(order, [low, high], btype="bandpass", output="sos")
-    sos = signal.butter(order, [low, high], analog=False, btype="band", output="sos")
 
-    # return b, a
-    return sos
+    if type == "ab":
+        b, a = signal.butter(order, [low, high], btype="band", analog=False)
+        return b, a
+    elif type == "sos":
+
+        sos = signal.butter(order, [low, high], analog=False, btype="band", output="sos")
+        return sos
 
 
-def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
-    # b, a = butter_bandpass(lowcut, highcut, fs, order=order)
-    # y = signal.lfilter(b, a, data)
-    sos = butter_bandpass(lowcut, highcut, fs, order=order)
-
-    y = signal.sosfiltfilt(sos, data)
+def butter_bandpass_filter(data, lowcut, highcut, fs, order=5, type="sos"):
+    if type == "ab":
+        b, a = butter_bandpass(lowcut, highcut, fs, order=order)
+        y = signal.lfilter(b, a, data)
+    elif type == "sos":
+        sos = butter_bandpass(lowcut, highcut, fs, order=order)
+        y = signal.sosfiltfilt(sos, data)
 
     return y
 
