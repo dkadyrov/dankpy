@@ -15,10 +15,12 @@ import soundfile as sf
 np.seterr(divide="ignore")
 valid_audio = ["wav", "flac", "mp3", "ogg", "aiff", "au"]
 
+
 class Audio:
     """
     Audio class for handling audio files
     """
+
     def __init__(self, filepath=None, audio=None, sample_rate=None, start=None):
         if filepath:
             self.filepath = filepath
@@ -56,7 +58,7 @@ class Audio:
         )
 
         self.data["signal"] = self.audio
-        self.data["time [s]"] = self.data.index/self.sample_rate
+        self.data["time [s]"] = self.data.index / self.sample_rate
         self.data["time [ms]"] = self.data["time [s]"] * 1000
 
     def add_data(self, filepath):
@@ -153,9 +155,7 @@ class Audio:
 
         if restart:
             sample.data = sample.data.reset_index(drop=True)
-            sample.data["time [s]"] = (
-                sample.data.index / sample.sample_rate
-            )
+            sample.data["time [s]"] = sample.data.index / sample.sample_rate
             sample.data["time [ms]"] = sample.data["time [s]"] * 1000
 
         sample.start = sample.data.datetime.iloc[0]
@@ -174,13 +174,13 @@ class Audio:
             sample_rate (int): Sample rate to resample audio to
         """
 
-        try: 
+        try:
             self.audio = librosa.resample(
                 self.audio, orig_sr=self.sample_rate, target_sr=sample_rate
             )
         except Exception as e:
             print(f"Error: {e}")
-            self.audio = [0]*int(self.duration)*int(sample_rate)
+            self.audio = [0] * int(self.duration) * int(sample_rate)
             print(f"An error occurred while resampling audio: {e}")
 
         self.sample_rate = sample_rate
@@ -190,7 +190,7 @@ class Audio:
         self.data["datetime"] = pd.date_range(
             start=self.start, end=self.end, periods=len(self.audio)
         )
-        self.data["time [s]"] = self.data.index/self.sample_rate
+        self.data["time [s]"] = self.data.index / self.sample_rate
         self.data["time [ms]"] = self.data["time [s]"] * 1000
         self.data["signal"] = self.audio
 
@@ -201,7 +201,7 @@ class Audio:
         nfft: int = 8192,
         noverlap: int = 4096,
         nperseg: int = 8192,
-        method="datetime"
+        method="datetime",
     ) -> tuple:
         """
         Generates spectrogram of audio
@@ -226,7 +226,7 @@ class Audio:
             nperseg=nperseg,
             start=self.start,
             end=self.end,
-            method=method
+            method=method,
         )
 
         return time, frequency, Pxx
@@ -244,7 +244,7 @@ class Audio:
         showscale: bool = False,
         cmap="jet",
         aspect="auto",
-        method="datetime"
+        method="datetime",
     ):
         fig, ax = plt.subplots()
 
@@ -263,7 +263,7 @@ class Audio:
         if zmax is None:
             zmax = Pxx.max()
 
-        if method == "seconds": 
+        if method == "seconds":
             extents = [
                 self.data["time [s]"].min(),
                 self.data["time [s]"].max(),
@@ -277,7 +277,7 @@ class Audio:
                 frequency.min(),
                 frequency.max(),
             ]
-        elif method == "samples": 
+        elif method == "samples":
             extents = [0, len(self.data), frequency.min(), frequency.max()]
         else:
             extents = [self.start, self.end, frequency.min(), frequency.max()]
@@ -298,11 +298,13 @@ class Audio:
             ax.set_xlim(self.data["time [s]"].min(), round(self.data["time [s]"].max()))
         elif method == "ms":
             ax.set_xlabel("Time [ms]")
-            ax.set_xlim(self.data["time [ms]"].min(), round(self.data["time [ms]"].max()))
+            ax.set_xlim(
+                self.data["time [ms]"].min(), round(self.data["time [ms]"].max())
+            )
         elif method == "samples":
             ax.set_xlabel("Samples")
             ax.set_xlim(0, len(self.data))
-        else: 
+        else:
             ax.set_xlim([self.data.datetime.iloc[0], self.data.datetime.iloc[-1]])
             ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M:%S"))
             # ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=2))
@@ -406,15 +408,13 @@ class Audio:
             ax.plot(self.data.index, self.data.signal)
             ax.set_xlabel("Samples")
             ax.set_xlim(0, len(self.data))
-            
+
         ax.set_ylabel("Amplitude [a.u.]")
-        
+
         return fig, ax
-    
+
     def plot_envelope(self, method: str = "datetime"):
         fig, ax = plt.subplots()
-
-    
 
         if method == "datetime":
             ax.plot(self.data.datetime, self.envelope())
@@ -436,11 +436,11 @@ class Audio:
             ax.plot(self.data.index, self.envelope())
             ax.set_xlabel("Samples")
             ax.set_xlim(0, len(self.data))
-            
+
         ax.set_ylabel("Amplitude [a.u.]")
-        
+
         return fig, ax
-    
+
     def psd(self, window_size: int = 4096) -> tuple:
         """
         Generates the power spectral density of the audio
@@ -508,7 +508,9 @@ class Audio:
             Audio: Filtered audio
         """
 
-        audio = butter_highpass_filter(self.data.signal, cutoff, self.sample_rate, order)
+        audio = butter_highpass_filter(
+            self.data.signal, cutoff, self.sample_rate, order
+        )
 
         if overwrite is True:
             self.data.signal = audio
@@ -537,7 +539,7 @@ class Audio:
             self.data.signal = audio
             self.audio = audio
         else:
-            return list(audio)  
+            return list(audio)
 
     def reduce_noise(
         self,
@@ -581,13 +583,10 @@ class Audio:
             filepath (str): filepath of output
             sample_rate (int): desired file sample rate
         """
-        if ".wav" not in filepath: 
+        if ".wav" not in filepath:
             filepath = filepath + ".wav"
 
         sf.write(filepath, self.data.signal, self.sample_rate)
-
-
-
 
 
 def combine_audio(list_of_files):
@@ -611,44 +610,54 @@ def combine_audio(list_of_files):
 
     return combined
 
+
 def butter_lowpass(cutoff, fs, order):
     nyq = 0.5 * fs
     cutoff = cutoff / nyq
     b, a = signal.butter(order, cutoff, btype="lowpass", analog=False)
-    
+
     return b, a
+
 
 def butter_lowpass_filter(data, cutoff, fs, order=5):
     b, a = butter_lowpass(cutoff, fs, order=order)
     y = signal.filtfilt(b, a, data)
-    
+
     return y
+
 
 def butter_highpass(cutoff, fs, order=5):
     nyq = 0.5 * fs
     normal_cutoff = cutoff / nyq
-    b, a = signal.butter(order, normal_cutoff, btype='high', analog=False)
-    
+    b, a = signal.butter(order, normal_cutoff, btype="high", analog=False)
+
     return b, a
+
 
 def butter_highpass_filter(data, cutoff, fs, order=5):
     b, a = butter_highpass(cutoff, fs, order=order)
     y = signal.filtfilt(b, a, data)
-    
+
     return y
 
+
 def butter_bandpass(lowcut, highcut, fs, order=5):
-    nyq = 0.5*fs
+    nyq = 0.5 * fs
     low = lowcut / nyq
     high = highcut / nyq
-    b, a = signal.butter(order, [low, high], btype='bandpass')
-    
-    return b, a
+    # b, a = signal.butter(order, [low, high], btype="bandpass", output="sos")
+    sos = signal.butter(order, [low, high], analog=False, btype="band", output="sos")
+
+    # return b, a
+    return sos
 
 
 def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
-    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
-    y = signal.lfilter(b, a, data)
+    # b, a = butter_bandpass(lowcut, highcut, fs, order=order)
+    # y = signal.lfilter(b, a, data)
+    sos = butter_bandpass(lowcut, highcut, fs, order=order)
+
+    y = signal.sosfiltfilt(sos, data)
     
     return y
 
@@ -700,7 +709,7 @@ def spectrogram(
         mode="psd",
     )
 
-    if method == "datetime": 
+    if method == "datetime":
         if start:
             if end is None:
                 end = start + timedelta(seconds=len(data) / sample_rate)
@@ -812,7 +821,14 @@ def mp3_to_wav(input: str, output: str, output_format: str = "wav") -> None:
 
 #     return w1, lp
 
-def psd(x: list or pd.Series, sample_rate: int, window_size: int = 4096, window: str ="blackmanharris", scaling: str ="spectrum") -> tuple:
+
+def psd(
+    x: list or pd.Series,
+    sample_rate: int,
+    window_size: int = 4096,
+    window: str = "blackmanharris",
+    scaling: str = "spectrum",
+) -> tuple:
     if window == "blackmanharris":
         window = signal.windows.blackmanharris(window_size)
     elif window == "hann":
@@ -825,28 +841,37 @@ def psd(x: list or pd.Series, sample_rate: int, window_size: int = 4096, window:
         window = signal.windows.blackman(window_size)
     elif window == "boxcar":
         window = signal.windows.boxcar(window_size)
-    
+
     freq, amp = signal.periodogram(x, fs=sample_rate, window=window, scaling=scaling)
-    amp = 10*np.log10(amp)
+    amp = 10 * np.log10(amp)
 
     return freq, amp
 
+
 # %%
-def peak_hold(data, window=8*1024, sample_rate=24000):
+def peak_hold(data, window=8 * 1024, sample_rate=24000):
     df = pd.DataFrame()
-    samples = 0 
-    while samples < sample_rate * len(data): 
-        d = data[samples:samples+window]
+    samples = 0
+    while samples < sample_rate * len(data):
+        d = data[samples : samples + window]
         if len(d) < window:
             break
         # freq, amp = audio.psd(d, sample_rate=sample_rate, window_size=sample_size)
-        freq, amp = signal.periodogram(d, fs=sample_rate, window=signal.windows.blackmanharris(window), scaling="spectrum")
-        amp = 10*np.log10(amp)
+        freq, amp = signal.periodogram(
+            d,
+            fs=sample_rate,
+            window=signal.windows.blackmanharris(window),
+            scaling="spectrum",
+        )
+        amp = 10 * np.log10(amp)
         if "frequency" not in df.columns:
             df["frequency"] = freq
         if "amplitude" not in df.columns:
             df["amplitude"] = amp
-        else: 
-            df["amplitude"] = [amp[i] if amp[i] > df.amplitude[i] else df.amplitude[i] for i in range(len(amp))]
+        else:
+            df["amplitude"] = [
+                amp[i] if amp[i] > df.amplitude[i] else df.amplitude[i]
+                for i in range(len(amp))
+            ]
         samples += window
     return df

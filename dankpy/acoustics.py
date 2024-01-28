@@ -119,7 +119,7 @@ def decibel(x: list, u: str = "power", r: float = 1) -> list:
     elif u == "power" and r is None:
         x = abs(x) ** 2
 
-    return (10 * np.log10(x) + 300) - 300
+    return 10 * np.log10(x)
 
 
 def integrate_PSD_db(
