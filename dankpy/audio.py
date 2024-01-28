@@ -658,7 +658,7 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
     sos = butter_bandpass(lowcut, highcut, fs, order=order)
 
     y = signal.sosfiltfilt(sos, data)
-    
+
     return y
 
 
@@ -828,6 +828,7 @@ def psd(
     window_size: int = 4096,
     window: str = "blackmanharris",
     scaling: str = "spectrum",
+    method="amplitude"
 ) -> tuple:
     if window == "blackmanharris":
         window = signal.windows.blackmanharris(window_size)
@@ -843,7 +844,11 @@ def psd(
         window = signal.windows.boxcar(window_size)
 
     freq, amp = signal.periodogram(x, fs=sample_rate, window=window, scaling=scaling)
-    amp = 10 * np.log10(amp)
+
+    if method=="amplitude": 
+        amp = 10 * np.log10(amp)
+    else: 
+        amp = amp
 
     return freq, amp
 
