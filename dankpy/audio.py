@@ -572,12 +572,13 @@ class Audio:
         return data
 
     def envelope(self, overwrite=False):
-        envelope = signal.hilbert(self.data.signal)
+        envelope = np.abs(signal.hilbert(self.data.signal))
 
         if overwrite is True: 
             self.data.signal = envelope
             self.audio = envelope
-        else:
+        
+        if overwrite is False:
             return envelope
 
     def write_audio(self, filepath: str) -> None:
@@ -912,7 +913,16 @@ def peak_hold(data, window=8 * 1024, sample_rate=24000):
             window=signal.windows.blackmanharris(window),
             scaling="spectrum",
         )
-        amp = 10 * np.log10(amp)
+        # freq, amp = signal.welch(
+        #     d,
+        #     fs=sample_rate,
+        #     window=signal.windows.blackmanharris(window),
+        #     nperseg=window,
+        #     scaling="spectrum",
+        #     average="mean"
+        # )
+
+        # amp = 10 * np.log10(amp)
         if "frequency" not in df.columns:
             df["frequency"] = freq
         if "amplitude" not in df.columns:
@@ -925,8 +935,44 @@ def peak_hold(data, window=8 * 1024, sample_rate=24000):
         samples += window
     return df
 
+# %%
+def average_hold(data, window=1024, sample_rate=24000):
+    df = pd.DataFrame()
+    samples = 0
+    while samples < sample_rate * len(data):
+        d = data[samples : samples + window]
+        if len(d) < window:
+            break
+        # freq, amp = audio.psd(d, sample_rate=sample_rate, window_size=sample_size)
+        freq, amp = signal.periodogram(
+            d,
+            fs=sample_rate,
+            window=signal.windows.blackmanharris(window),
+            scaling="spectrum",
+        )
+        # freq, amp = signal.welch(
+        #     d,
+        #     fs=sample_rate,
+        #     window=signal.windows.blackmanharris(window),
+        #     nperseg=window,
+        #     scaling="spectrum",
+        #     average="mean"
+        # )
 
 
+        # amp = 10 * np.log10(amp)
+        if "frequency" not in df.columns:
+            df["frequency"] = freq
+        if "amplitude" not in df.columns:
+            df["amplitude"] = amp
+        else:
+            df["amplitude"] += amp
+        
+        samples += window
+    
+    df["amplitude"] = df["amplitude"] / (samples)
+
+    return df
 
 def fade_in(data, sample_rate, fade_time=0.1, window="hann"):
 
@@ -943,7 +989,7 @@ def fade_out(data, sample_rate, fade_time=0.1, window="hann"):
     fade_samples = sample_rate * fade_time
 
     if window == "hann":
-        fade = signal.windows.hann(fade_samples*2)[:fade_samples]
+        fade = signal.windows.hann(fade_samples*2)[fade_samples:]
 
     data[-fade_samples:] = data[-fade_samples:] * fade
     
