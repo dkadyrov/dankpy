@@ -116,6 +116,8 @@ def new_smooth(data, num):
 
     return np.convolve(data, window, "valid")
 
+
+
 def window(array, window_size, freq):
     """Splits an array into subarrays of specified window_size and with a overlap of set frequency
 
@@ -177,7 +179,7 @@ def tukeywin(window_length, alpha=0.5):
 
 
 def histogram(x, bins, edges=True):
-    if edges == True: 
+    if edges is True: 
         bin_edges = np.r_[-np.Inf, 0.5 * (bins[:-1] + bins[1:]), 
             np.Inf]
         counts, edges =  np.histogram(x, bin_edges)
