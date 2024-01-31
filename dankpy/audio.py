@@ -637,7 +637,7 @@ def butter_lowpass_filter(data, cutoff, fs, order=5, type="sos"):
 def butter_highpass(cutoff, fs, order=5, type="sos"):
     nyq = 0.5 * fs
     normal_cutoff = cutoff / nyq
-    if type == "ab"
+    if type == "ab":
         b, a = signal.butter(order, normal_cutoff, btype="high", analog=False)
         b, a
     elif type == "sos":
@@ -888,7 +888,16 @@ def peak_hold(data, window=8 * 1024, sample_rate=24000):
             window=signal.windows.blackmanharris(window),
             scaling="spectrum",
         )
-        amp = 10 * np.log10(amp)
+        # freq, amp = signal.welch(
+        #     d,
+        #     fs=sample_rate,
+        #     window=signal.windows.blackmanharris(window),
+        #     nperseg=window,
+        #     scaling="spectrum",
+        #     average="mean"
+        # )
+
+        # amp = 10 * np.log10(amp)
         if "frequency" not in df.columns:
             df["frequency"] = freq
         if "amplitude" not in df.columns:
@@ -899,4 +908,43 @@ def peak_hold(data, window=8 * 1024, sample_rate=24000):
                 for i in range(len(amp))
             ]
         samples += window
+    return df
+
+# %%
+def average_hold(data, window=1024, sample_rate=24000):
+    df = pd.DataFrame()
+    samples = 0
+    while samples < sample_rate * len(data):
+        d = data[samples : samples + window]
+        if len(d) < window:
+            break
+        # freq, amp = audio.psd(d, sample_rate=sample_rate, window_size=sample_size)
+        freq, amp = signal.periodogram(
+            d,
+            fs=sample_rate,
+            window=signal.windows.blackmanharris(window),
+            scaling="spectrum",
+        )
+        # freq, amp = signal.welch(
+        #     d,
+        #     fs=sample_rate,
+        #     window=signal.windows.blackmanharris(window),
+        #     nperseg=window,
+        #     scaling="spectrum",
+        #     average="mean"
+        # )
+
+
+        # amp = 10 * np.log10(amp)
+        if "frequency" not in df.columns:
+            df["frequency"] = freq
+        if "amplitude" not in df.columns:
+            df["amplitude"] = amp
+        else:
+            df["amplitude"] += amp
+        
+        samples += window
+    
+    df["amplitude"] = df["amplitude"] / (samples)
+
     return df
