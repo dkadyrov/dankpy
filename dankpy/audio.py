@@ -572,12 +572,13 @@ class Audio:
         return data
 
     def envelope(self, overwrite=False):
-        envelope = signal.hilbert(self.data.signal)
+        envelope = np.abs(signal.hilbert(self.data.signal))
 
         if overwrite is True: 
             self.data.signal = envelope
             self.audio = envelope
-        else:
+        
+        if overwrite is False:
             return envelope
 
     def write_audio(self, filepath: str) -> None:
@@ -935,7 +936,6 @@ def peak_hold(data, window=8 * 1024, sample_rate=24000):
         samples += window
     return df
 
-<<<<<<< HEAD
 # %%
 def average_hold(data, window=1024, sample_rate=24000):
     df = pd.DataFrame()
@@ -974,9 +974,6 @@ def average_hold(data, window=1024, sample_rate=24000):
     df["amplitude"] = df["amplitude"] / (samples)
 
     return df
-=======
-
-
 
 def fade_in(data, sample_rate, fade_time=0.1, window="hann"):
 
@@ -993,7 +990,7 @@ def fade_out(data, sample_rate, fade_time=0.1, window="hann"):
     fade_samples = sample_rate * fade_time
 
     if window == "hann":
-        fade = signal.windows.hann(fade_samples*2)[:fade_samples]
+        fade = signal.windows.hann(fade_samples*2)[fade_samples:]
 
     data[-fade_samples:] = data[-fade_samples:] * fade
     
