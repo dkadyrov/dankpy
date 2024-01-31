@@ -571,8 +571,14 @@ class Audio:
 
         return data
 
-    def envelope(self):
-        return np.abs(signal.hilbert(self.data.signal))
+    def envelope(self, overwrite=False):
+        envelope = signal.hilbert(self.data.signal)
+
+        if overwrite is True: 
+            self.data.signal = envelope
+            self.audio = envelope
+        else:
+            return envelope
 
     def write_audio(self, filepath: str) -> None:
         """
@@ -587,6 +593,25 @@ class Audio:
             filepath = filepath + ".wav"
 
         sf.write(filepath, self.data.signal, self.sample_rate)
+
+    def fade_in(self, fade_time=0.1, window="hann", overwrite=False):
+        data = fade_in(self.data.signal, self.sample_rate, fade_time, window)
+
+        if overwrite is True: 
+            self.data.signal = data
+            self.audio = self.data.signal
+        else: 
+            return data
+
+
+    def fade_out(self, fade_time=0.1, window="hann", overwrite=False):
+        data = fade_out(self.data.signal, self.sample_rate, fade_time, window)
+        
+        if overwrite is True: 
+            self.data.signal = data
+            self.audio = self.data.signal
+        else: 
+            return data
 
 
 def combine_audio(list_of_files):
@@ -910,6 +935,7 @@ def peak_hold(data, window=8 * 1024, sample_rate=24000):
         samples += window
     return df
 
+<<<<<<< HEAD
 # %%
 def average_hold(data, window=1024, sample_rate=24000):
     df = pd.DataFrame()
@@ -948,3 +974,37 @@ def average_hold(data, window=1024, sample_rate=24000):
     df["amplitude"] = df["amplitude"] / (samples)
 
     return df
+=======
+
+
+
+def fade_in(data, sample_rate, fade_time=0.1, window="hann"):
+
+    fade_samples = sample_rate * fade_time
+
+    if window == "hann":
+        fade = signal.windows.hann(fade_samples*2)[:fade_samples]
+
+    data[:fade_samples] = data[:fade_samples] * fade
+    
+    return data
+
+def fade_out(data, sample_rate, fade_time=0.1, window="hann"):
+    fade_samples = sample_rate * fade_time
+
+    if window == "hann":
+        fade = signal.windows.hann(fade_samples*2)[:fade_samples]
+
+    data[-fade_samples:] = data[-fade_samples:] * fade
+    
+    return data
+
+def echo(data, sample_rate, delay=0.1, decay=0.5):
+    delay_samples = int(sample_rate * delay)
+    decay_samples = int(sample_rate * decay)
+    echo = np.zeros(len(data) + delay_samples)
+    echo[delay_samples:] = data * decay
+    echo[:len(data)] += data
+    
+    return echo
+>>>>>>> 50968da1936353124961aca302f2b9806cbd9f2b
