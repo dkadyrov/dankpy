@@ -476,7 +476,7 @@ class Audio:
 
         return fig, ax
 
-    def lowpass_filter(self, cutoff, order=4, overwrite=False):
+    def lowpass_filter(self, cutoff, order=4, overwrite=False, type="sos"):
         """
         Lowpass filter using Butterworth filter
 
@@ -488,7 +488,7 @@ class Audio:
             Audio: Filtered audio
         """
 
-        audio = butter_lowpass_filter(self.data.signal, cutoff, self.sample_rate, order)
+        audio = butter_lowpass_filter(self.data.signal, cutoff, self.sample_rate, order, type=type)
 
         if overwrite is True:
             self.data.signal = audio
@@ -496,7 +496,7 @@ class Audio:
         else:
             return list(audio)
 
-    def highpass_filter(self, cutoff, order=4, overwrite=False):
+    def highpass_filter(self, cutoff, order=4, overwrite=False, type="sos"):
         """
         Highpass filter using Butterworth filter
 
@@ -509,7 +509,7 @@ class Audio:
         """
 
         audio = butter_highpass_filter(
-            self.data.signal, cutoff, self.sample_rate, order
+            self.data.signal, cutoff, self.sample_rate, order, type=type
         )
 
         if overwrite is True:
@@ -518,7 +518,7 @@ class Audio:
         else:
             return list(audio)
 
-    def bandpass_filter(self, lowcut, highcut, order=4, overwrite=False):
+    def bandpass_filter(self, lowcut, highcut, order=4, type="sos",overwrite=False):
         """
         Bandpass filter using Butterworth filter
 
@@ -532,7 +532,7 @@ class Audio:
         """
 
         audio = butter_bandpass_filter(
-            self.data.signal, lowcut, highcut, self.sample_rate, order
+            self.data.signal, lowcut, highcut, self.sample_rate, order, type=type
         )
 
         if overwrite is True:
@@ -603,7 +603,6 @@ class Audio:
         else: 
             return data
 
-
     def fade_out(self, fade_time=0.1, window="hann", overwrite=False):
         data = fade_out(self.data.signal, self.sample_rate, fade_time, window)
         
@@ -662,7 +661,7 @@ def butter_lowpass_filter(data, cutoff, fs, order=5, type="sos"):
 def butter_highpass(cutoff, fs, order=5, type="sos"):
     nyq = 0.5 * fs
     normal_cutoff = cutoff / nyq
-    if type == "ab"
+    if type == "ab":
         b, a = signal.butter(order, normal_cutoff, btype="high", analog=False)
         b, a
     elif type == "sos":
