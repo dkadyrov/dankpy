@@ -3,7 +3,8 @@ import pandas as pd
 from scipy.signal import tukey, correlate, savgol_filter
 from statsmodels.nonparametric.smoothers_lowess import lowess
 
-def lowess_smooth(x, y, size): 
+
+def lowess_smooth(x, y, size):
     """Generates lowess smoothing
 
     :param x: x data
@@ -16,21 +17,21 @@ def lowess_smooth(x, y, size):
     :rtype: numpy.array
     """
 
-
     data = pd.DataFrame()
     data["x"] = x
-    data["y"] = y 
+    data["y"] = y
 
     lws = lowess(y, x, frac=size)
-    
+
     smooth = pd.DataFrame()
-    smooth["x"] = lws[:,0]
-    smooth["y"] = lws[:,1]
+    smooth["x"] = lws[:, 0]
+    smooth["y"] = lws[:, 1]
 
     data = pd.merge_ordered(data, smooth, on="x", suffixes=["orig", "smooth"])
 
     return data["ysmooth"].values
-    # smooth["x"] = 
+    # smooth["x"] =
+
 
 def smooth(data, window="tukey", num=8, ratio=0.8):
     """performs rolling window smoothing
@@ -41,7 +42,7 @@ def smooth(data, window="tukey", num=8, ratio=0.8):
     :type window: numpy.array or str, optional
     :param num: window size, defaults to 8
     :type num: int, optional
-    :param ratio: smoothin ratio, defaults to 0.8
+    :param ratio: smoothing ratio, defaults to 0.8
     :type ratio: float, optional
     :return: smoothed array
     :rtype: numpy.array
@@ -50,7 +51,7 @@ def smooth(data, window="tukey", num=8, ratio=0.8):
     if window == "tukey":
         window = tukey(num, ratio)
         window = window / sum(window)
- 
+
     # npad = len(window)-1
 
     # u_pad = np.pad(data, (npad//2, npad - npad//2), mode = "constant")
@@ -63,7 +64,6 @@ def smooth(data, window="tukey", num=8, ratio=0.8):
 
     # conv = full[first:first+len(data)]
 
-    
     # conv = np.convolve(data, window, mode='same')
     # valid_trim = int(np.floor(num/2))
     # conv[0:1+valid_trim] = 0
@@ -73,11 +73,10 @@ def smooth(data, window="tukey", num=8, ratio=0.8):
     # conv = np.append(conv, np.zeros((1, abs(len(data)-len(conv)))))
 
     conv = np.convolve(data, window, mode="same")
-    valid_trim = int(np.floor(num/2))
-    conv[0:1+valid_trim] = 0
-    conv[-1-valid_trim:-1] = 0
+    valid_trim = int(np.floor(num / 2))
+    conv[0 : 1 + valid_trim] = 0
+    conv[-1 - valid_trim : -1] = 0
 
-    
     # padded = np.pad(data, (npad//2, npad-npad//2), mode="edge")
 
     # conv = np.convolve(data, window, "same")
@@ -92,30 +91,33 @@ def smooth(data, window="tukey", num=8, ratio=0.8):
     # return full[first: first+len(data)]
     # return np.convolve(data, window, "same")
 
+
 def smooth_data_np_cumsum_my_average(arr, span):
     cumsum_vec = np.cumsum(arr)
-    moving_average = (cumsum_vec[2 * span:] - cumsum_vec[:-2 * span]) / (2 * span)
+    moving_average = (cumsum_vec[2 * span :] - cumsum_vec[: -2 * span]) / (2 * span)
 
     # The "my_average" part again. Slightly different to before, because the
     # moving average from cumsum is shorter than the input and needs to be padded
     front, back = [np.average(arr[:span])], []
     for i in range(1, span):
-        front.append(np.average(arr[:i + span]))
-        back.insert(0, np.average(arr[-i - span:]))
-    back.insert(0, np.average(arr[-2 * span:]))
+        front.append(np.average(arr[: i + span]))
+        back.insert(0, np.average(arr[-i - span :]))
+    back.insert(0, np.average(arr[-2 * span :]))
     return np.concatenate((front, moving_average, back))
 
-def smooth_data_savgol_0(arr, span):  
+
+def smooth_data_savgol_0(arr, span):
     return savgol_filter(arr, span * 2 + 1, 0)
 
-def smooth_data_savgol_1(arr, span):  
+
+def smooth_data_savgol_1(arr, span):
     return savgol_filter(arr, span * 2 + 1, 1)
+
 
 def new_smooth(data, num):
     window = tukey(num)
 
     return np.convolve(data, window, "valid")
-
 
 
 def window(array, window_size, freq):
@@ -130,7 +132,6 @@ def window(array, window_size, freq):
     :return: _description_
     :rtype: _type_
     """
-
 
     shape = (array.shape[0] - window_size + 1, window_size)
     strides = (array.strides[0],) + array.strides
@@ -179,13 +180,11 @@ def tukeywin(window_length, alpha=0.5):
 
 
 def histogram(x, bins, edges=True):
-    if edges is True: 
-        bin_edges = np.r_[-np.Inf, 0.5 * (bins[:-1] + bins[1:]), 
-            np.Inf]
-        counts, edges =  np.histogram(x, bin_edges)
-    
-    else: 
-        counts, edges = np.histogram(x, bins)
-    
-    return counts, edges
+    if edges is True:
+        bin_edges = np.r_[-np.Inf, 0.5 * (bins[:-1] + bins[1:]), np.Inf]
+        counts, edges = np.histogram(x, bin_edges)
 
+    else:
+        counts, edges = np.histogram(x, bins)
+
+    return counts, edges

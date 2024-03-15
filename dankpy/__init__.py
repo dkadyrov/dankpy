@@ -12,3 +12,4 @@ from .units import *
 from .utilities import * 
 from .dankframe import *
 from .graph import *
+from .statistics import *

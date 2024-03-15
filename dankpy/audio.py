@@ -90,8 +90,8 @@ class Audio:
 
     def trim(
         self,
-        start: datetime or str,
-        end: datetime or str = None,
+        start: datetime or str or float or int,
+        end: datetime or str or float or int = None,
         length: float = None,
         method="datetime",
         restart=False,
@@ -698,10 +698,10 @@ def butter_bandpass(lowcut, highcut, fs, order=5, type="sos"):
 
 def butter_bandpass_filter(data, lowcut, highcut, fs, order=5, type="sos"):
     if type == "ab":
-        b, a = butter_bandpass(lowcut, highcut, fs, order=order)
-        y = signal.lfilter(b, a, data)
+        b, a = butter_bandpass(lowcut, highcut, fs, order=order, type="ab")
+        y = signal.filtfilt(b, a, data)
     elif type == "sos":
-        sos = butter_bandpass(lowcut, highcut, fs, order=order)
+        sos = butter_bandpass(lowcut, highcut, fs, order=order, type="sos")
         y = signal.sosfiltfilt(sos, data)
 
     return y
