@@ -1,3 +1,4 @@
+import numpy as np 
 import pandas as pd
 
 
@@ -49,3 +50,10 @@ def list_to_pd(list_of_dicts: list) -> pd.DataFrame:
         _type_: _description_
     """
     return pd.DataFrame(x.__dict__ for x in list_of_dicts)
+
+
+def coiled_cable_length(d, num):
+    return np.pi * d * num
+
+def rms(x):
+    return np.sqrt(np.mean(x**2))

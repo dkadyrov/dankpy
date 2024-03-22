@@ -5,9 +5,19 @@ from collections import namedtuple, OrderedDict
 # Color = namedtuple('Color','red, green, blue')
 colors = {}  # dict of colors
 
-
 class Color(object):
-    def __init__(self, red, green, blue):
+    def __init__(self, red=None, green=None, blue=None, rgb=None, hex=None):
+        if rgb: 
+            if isinstance(rgb, tuple):
+                red, green, blue = rgb
+            else: 
+                raise ValueError("rgb must be a tuple")
+        elif hex:
+            if isinstance(hex, str):
+                red, green, blue = hex_to_rgb(hex)
+            else:
+                raise ValueError("hex must be a string")
+
         self.red = red
         self.green = green
         self.blue = blue
@@ -17,7 +27,6 @@ class Color(object):
         self.rgb = (self.red, self.green, self.blue)
         self.hex = rgb_to_hex(self.red, self.green, self.blue)
         self.cmyk = (self.cyan, self.magenta, self.yellow, self.key)
-
 
 def rgb_to_hex(r:int, g:int, b:int) -> str:
     """

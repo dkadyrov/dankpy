@@ -1,4 +1,6 @@
+from collections import OrderedDict
 import matplotlib.pyplot as plt
+from dankpy.color import Color, hex_to_rgb
 
 linestyle = [
     ("solid", "solid"),  # Same as (0, ()) or '-'
@@ -24,3 +26,26 @@ def get_ax_size(fig, ax):
     width *= fig.dpi
     height *= fig.dpi
     return width, height
+
+class Okabeito(object): 
+    def __init__(self):
+        self.colors = OrderedDict()
+        self.colors["lightblue"] = Color(hex="#56B4E9")
+        self.colors["yellow"] = Color(hex="#E69F00")
+        self.colors["orange"] = Color(hex="#F0E442")
+        self.colors["green"] = Color(hex="#009E73")
+        self.colors["purple"] = Color(hex="#CC79A7")
+        self.colors["red"] = Color(hex="#D55E00")
+        self.colors["blue"] = Color(hex="#0072B2")
+        self.colors["black"] = Color(hex="#000000")
+ 
+    def __getitem__(self, key):
+        return self.colors[key]
+    
+    def __iter__(self):
+        return iter(self.colors.values())
+    
+    def hex_list(self):
+        return [c.hex for c in self.colors.values()]
+    
+Okabeito = Okabeito()
