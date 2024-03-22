@@ -518,7 +518,7 @@ class Audio:
         else:
             return list(audio)
 
-    def bandpass_filter(self, lowcut, highcut, order=4, type="sos",overwrite=False):
+    def bandpass_filter(self, lowcut, highcut, order=4, type="sos", overwrite=False):
         """
         Bandpass filter using Butterworth filter
 
@@ -596,7 +596,7 @@ class Audio:
         sf.write(filepath, self.data.signal, self.sample_rate)
 
     def fade_in(self, fade_time=0.1, window="hann", overwrite=False):
-        data = fade_in(self.data.signal, self.sample_rate, fade_time, window)
+        data = fade_in(self.data.signal.values, self.sample_rate, fade_time, window)
 
         if overwrite is True: 
             self.data.signal = data
@@ -605,7 +605,7 @@ class Audio:
             return data
 
     def fade_out(self, fade_time=0.1, window="hann", overwrite=False):
-        data = fade_out(self.data.signal, self.sample_rate, fade_time, window)
+        data = fade_out(self.data.signal.values, self.sample_rate, fade_time, window)
         
         if overwrite is True: 
             self.data.signal = data
@@ -843,28 +843,28 @@ def mp3_to_wav(input: str, output: str, output_format: str = "wav") -> None:
     sound.export(output, format=output_format)
 
 
-# def psd(x: list or pd.Series, sample_rate: int, window_size: int = 4096) -> tuple:
-#     """
-#     Compute the power spectral density of a signal.
+def psd2(x: list or pd.Series, sample_rate: int, window_size: int = 4096) -> tuple:
+    """
+    Compute the power spectral density of a signal.
 
-#     Args:
-#         x (array): signal
-#         sample_rate (int): sample rate of the signal
-#         sample_window (int, optional): length of the window to use for the FFT. Defaults to 4096.
+    Args:
+        x (array): signal
+        sample_rate (int): sample rate of the signal
+        sample_window (int, optional): length of the window to use for the FFT. Defaults to 4096.
 
-#     Returns:
-#         tuple: power spectral density
-#     """
+    Returns:
+        tuple: power spectral density
+    """
 
-#     f = np.fft.rfft(x)
-#     f1 = f[0 : int(window_size / 2)]
-#     pf1 = 2 * np.abs(f1 * np.conj(f1)) / (sample_rate * window_size)
-#     lpf1 = 10 * np.log10(pf1)
-#     w = np.arange(1, window_size / 2 + 1)
-#     lp = lpf1[1 : int(window_size / 2)]
-#     w1 = sample_rate * w / window_size
+    f = np.fft.rfft(x)
+    f1 = f[0 : int(window_size / 2)]
+    pf1 = 2 * np.abs(f1 * np.conj(f1)) / (sample_rate * window_size)
+    lpf1 = 10 * np.log10(pf1)
+    w = np.arange(1, window_size / 2 + 1)
+    lp = lpf1[1 : int(window_size / 2)]
+    w1 = sample_rate * w / window_size
 
-#     return w1, lp
+    return w1, lp
 
 
 def psd(
