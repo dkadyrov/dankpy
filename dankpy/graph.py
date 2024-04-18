@@ -49,3 +49,9 @@ class Okabeito(object):
         return [c.hex for c in self.colors.values()]
     
 Okabeito = Okabeito()
+
+def legend_options(ax, loc="outside center left"):
+    if loc == "outside center left":
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+    elif loc == "upper upper left": 
+        ax.legend(loc="upper left", bbox_to_anchor=(1.05, 1.05))

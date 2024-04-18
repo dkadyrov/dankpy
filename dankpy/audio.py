@@ -976,7 +976,7 @@ def average_hold(data, window=1024, sample_rate=24000):
 
 def fade_in(data, sample_rate, fade_time=0.1, window="hann"):
 
-    fade_samples = sample_rate * fade_time
+    fade_samples = int(sample_rate * fade_time)
 
     if window == "hann":
         fade = signal.windows.hann(fade_samples*2)[:fade_samples]
@@ -986,7 +986,7 @@ def fade_in(data, sample_rate, fade_time=0.1, window="hann"):
     return data
 
 def fade_out(data, sample_rate, fade_time=0.1, window="hann"):
-    fade_samples = sample_rate * fade_time
+    fade_samples = int(sample_rate * fade_time)
 
     if window == "hann":
         fade = signal.windows.hann(fade_samples*2)[fade_samples:]
