@@ -245,8 +245,12 @@ class Audio:
         cmap="jet",
         aspect="auto",
         method="datetime",
+        ax=None
     ):
-        fig, ax = plt.subplots()
+        if ax is None:
+            fig, ax = plt.subplots()
+        else: 
+            fig = None
 
         time, frequency, Pxx = self.spectrogram(
             window=window,
@@ -314,7 +318,8 @@ class Audio:
                 axi, location="right", ticks=[zmin, zmax]
             )
 
-        return fig, ax
+        if fig: 
+            return fig, ax
 
     # def spectrograph(
     #     self,
@@ -385,8 +390,11 @@ class Audio:
 
     #     return fig
 
-    def plot_waveform(self, method: str = "datetime"):
-        fig, ax = plt.subplots()
+    def plot_waveform(self, method: str = "datetime", ax=None):
+        if ax is None: 
+            fig, ax = plt.subplots()
+        else: 
+            fig = None
 
         if method == "datetime":
             ax.plot(self.data.datetime, self.data.signal)
@@ -411,7 +419,8 @@ class Audio:
 
         ax.set_ylabel("Amplitude [a.u.]")
 
-        return fig, ax
+        if fig: 
+            return fig, ax
 
     def plot_envelope(self, method: str = "datetime"):
         fig, ax = plt.subplots()
