@@ -32,7 +32,7 @@ def read_datetime(string: str) -> datetime:
             try:
                 dt = datetime.strptime(string, "%Y_%m_%d_%H_%M_%S")
             except:
-                dt = parser.parse(string)
+                dt = parser.parse(string, fuzzy=True)
 
     return dt
 

@@ -191,7 +191,7 @@ def metadata(filepath: str, extended=False) -> dict:
 
     return metadata
 
-def metadatas(filepaths: list, extended=False) -> dankframe.DankFrame:
+def metadatas(filepaths: list, extended=False, stevens=False) -> dankframe.DankFrame:
     """
     Generates metadata of files
 
@@ -204,13 +204,14 @@ def metadatas(filepaths: list, extended=False) -> dankframe.DankFrame:
 
     metadatas = dankframe.pd.DataFrame([metadata(filepath, extended) for filepath in filepaths])
 
-    for row, group in metadatas.groupby(["start", "channel"]):
-        if len(group) > 1: 
-            for j, row in group.iterrows():
-                if row.record_number > 1: 
-                    metadatas.at[row.name, "start"] = metadatas.iloc[row.name - 1].end
-                    metadatas.at[row.name, "end"] = metadatas.iloc[
-                                row.name
-                            ].start + timedelta(seconds=row.duration)
-                
+    if stevens: 
+        for row, group in metadatas.groupby(["start", "channel"]):
+            if len(group) > 1: 
+                for j, row in group.iterrows():
+                    if row.record_number > 1: 
+                        metadatas.at[row.name, "start"] = metadatas.iloc[row.name - 1].end
+                        metadatas.at[row.name, "end"] = metadatas.iloc[
+                                    row.name
+                                ].start + timedelta(seconds=row.duration)
+                                
     return metadatas
