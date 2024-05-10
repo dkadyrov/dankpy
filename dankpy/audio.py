@@ -93,7 +93,7 @@ class Audio:
         start: datetime or str or float or int,
         end: datetime or str or float or int = None,
         length: float = None,
-        method="datetime",
+        time_format="datetime",
         restart=False,
     ):
         """
@@ -109,7 +109,7 @@ class Audio:
         """
         sample = deepcopy(self)
 
-        if method == "datetime":
+        if time_format == "datetime":
             if not isinstance(start, datetime):
                 try:
                     start = dt.read_datetime(start)
@@ -130,14 +130,14 @@ class Audio:
                 (sample.data.datetime >= start) & (sample.data.datetime <= end)
             ]
 
-        if method == "samples":
+        if time_format == "samples":
             if end is None:
                 end = start + length
 
             sample = deepcopy(self)
             sample.data = sample.data.loc[start:end]
 
-        if method == "seconds":
+        if time_format == "seconds":
             if end is None:
                 end = start + length
 
@@ -145,7 +145,7 @@ class Audio:
                 (sample.data["time [s]"] >= start) & (sample.data["time [s]"] <= end)
             ]
 
-        if method == "ms":
+        if time_format == "ms":
             if end is None:
                 end = start + length
 
@@ -201,7 +201,7 @@ class Audio:
         nfft: int = 8192,
         noverlap: int = 4096,
         nperseg: int = 8192,
-        method="datetime",
+        time_format="datetime",
     ) -> tuple:
         """
         Generates spectrogram of audio
@@ -226,7 +226,7 @@ class Audio:
             nperseg=nperseg,
             start=self.start,
             end=self.end,
-            method=method,
+            time_format=time_format,
         )
 
         return time, frequency, Pxx
@@ -244,7 +244,7 @@ class Audio:
         showscale: bool = False,
         cmap="jet",
         aspect="auto",
-        method="datetime",
+        time_format="datetime",
         ax=None
     ):
         if ax is None:
@@ -267,21 +267,21 @@ class Audio:
         if zmax is None:
             zmax = Pxx.max()
 
-        if method == "seconds":
+        if time_format == "seconds":
             extents = [
                 self.data["time [s]"].min(),
                 self.data["time [s]"].max(),
                 frequency.min(),
                 frequency.max(),
             ]
-        elif method == "ms":
+        elif time_format == "ms":
             extents = [
                 self.data["time [ms]"].min(),
                 self.data["time [ms]"].max(),
                 frequency.min(),
                 frequency.max(),
             ]
-        elif method == "samples":
+        elif time_format == "samples":
             extents = [0, len(self.data), frequency.min(), frequency.max()]
         else:
             extents = [self.start, self.end, frequency.min(), frequency.max()]
@@ -297,15 +297,15 @@ class Audio:
 
         ax.set_ylabel("Frequency [Hz]")
 
-        if method == "seconds":
+        if time_format == "seconds":
             ax.set_xlabel("Time [s]")
             ax.set_xlim(self.data["time [s]"].min(), round(self.data["time [s]"].max()))
-        elif method == "ms":
+        elif time_format == "ms":
             ax.set_xlabel("Time [ms]")
             ax.set_xlim(
                 self.data["time [ms]"].min(), round(self.data["time [ms]"].max())
             )
-        elif method == "samples":
+        elif time_format == "samples":
             ax.set_xlabel("Samples")
             ax.set_xlim(0, len(self.data))
         else:
@@ -384,69 +384,69 @@ class Audio:
     #     )
 
     #     fig.update_layout(
-    #         yaxis_title="Signal [a.u.]",
+    #         yaxis_title="Signal ",
     #         yaxis_range=[-1.5, 1.5],
     #     )
 
     #     return fig
 
-    def plot_waveform(self, method: str = "datetime", ax=None):
+    def plot_waveform(self, time_format: str = "datetime", ax=None):
         if ax is None: 
             fig, ax = plt.subplots()
         else: 
             fig = None
 
-        if method == "datetime":
+        if time_format == "datetime":
             ax.plot(self.data.datetime, self.data.signal)
             ax.set_xlim(self.start, self.end)
             ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M:%S"))
             ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=2))
 
-        if method == "seconds":
+        if time_format == "seconds":
             ax.plot(self.data["time [s]"], self.data.signal)
             ax.set_xlabel("Time [s]")
             ax.set_xlim(self.data["time [s]"].min(), self.data["time [s]"].max())
 
-        if method == "ms":
+        if time_format == "ms":
             ax.plot(self.data["time [ms]"], self.data.signal)
             ax.set_xlabel("Time [ms]")
             ax.set_xlim(self.data["time [ms]"].min(), self.data["time [ms]"].max())
 
-        if method == "samples":
+        if time_format == "samples":
             ax.plot(self.data.index, self.data.signal)
             ax.set_xlabel("Samples")
             ax.set_xlim(0, len(self.data))
 
-        ax.set_ylabel("Amplitude [a.u.]")
+        ax.set_ylabel("Amplitude")
 
         if fig: 
             return fig, ax
 
-    def plot_envelope(self, method: str = "datetime"):
+    def plot_envelope(self, time_format: str = "datetime"):
         fig, ax = plt.subplots()
 
-        if method == "datetime":
+        if time_format == "datetime":
             ax.plot(self.data.datetime, self.envelope())
             ax.set_xlim(self.start, self.end)
             ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M:%S"))
             ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=2))
 
-        if method == "seconds":
+        if time_format == "seconds":
             ax.plot(self.data["time [s]"], self.envelope())
             ax.set_xlabel("Time [s]")
             ax.set_xlim(self.data["time [s]"].min(), self.data["time [s]"].max())
 
-        if method == "ms":
+        if time_format == "ms":
             ax.plot(self.data["time [ms]"], self.envelope())
             ax.set_xlabel("Time [ms]")
             ax.set_xlim(self.data["time [ms]"].min(), self.data["time [ms]"].max())
 
-        if method == "samples":
+        if time_format == "samples":
             ax.plot(self.data.index, self.envelope())
             ax.set_xlabel("Samples")
             ax.set_xlim(0, len(self.data))
 
-        ax.set_ylabel("Amplitude [a.u.]")
+        ax.set_ylabel("Amplitude")
 
         return fig, ax
 
@@ -724,7 +724,7 @@ def spectrogram(
     nfft: int = 4096,
     noverlap: int = 4096,
     nperseg: int = 8192,
-    method: str = "datetime",
+    time_format: str = "datetime",
     start: datetime = None,
     end: datetime = None,
 ) -> tuple:
@@ -763,18 +763,18 @@ def spectrogram(
         mode="psd",
     )
 
-    if method == "datetime":
+    if time_format == "datetime":
         if start:
             if end is None:
                 end = start + timedelta(seconds=len(data) / sample_rate)
             datetime = pd.date_range(start, end, periods=len(time))
 
             time = datetime
-    elif method == "samples":
+    elif time_format == "samples":
         time = time * sample_rate
-    elif method == "ms":
+    elif time_format == "ms":
         time = time * 1000
-    elif method == "seconds":
+    elif time_format == "seconds":
         time = time
 
     return time, frequency, Pxx
@@ -882,7 +882,7 @@ def psd(
     window_size: int = 4096,
     window: str = "blackmanharris",
     scaling: str = "spectrum",
-    method="amplitude"
+    time_format="amplitude"
 ) -> tuple:
     if window == "blackmanharris":
         window = signal.windows.blackmanharris(window_size)
@@ -899,7 +899,7 @@ def psd(
 
     freq, amp = signal.periodogram(x, fs=sample_rate, window=window, scaling=scaling)
 
-    if method=="amplitude": 
+    if time_format=="amplitude": 
         amp = 10 * np.log10(amp)
     else: 
         amp = amp
