@@ -16,7 +16,7 @@ setup(
         "glob2",
         "librosa",
         "vincenty",
-        "matplotlib==3.7.0",
+        "matplotlib",
         "plotly",
         "soundfile",
         "scipy",
@@ -24,7 +24,7 @@ setup(
         "lxml",
         "pydub",
         "xlrd",
-        "kaleido==0.1.0post1",
+        "kaleido",
         "ffmpeg",
         "openpyxl",
         "sqlalchemy",
@@ -33,5 +33,6 @@ setup(
         "docx", 
         "statsmodels",
         "python-dateutil",
+        "noisereduce"
     ],
 )
