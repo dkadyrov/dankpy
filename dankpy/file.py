@@ -3,7 +3,7 @@ import re
 from dankpy import dt, dankframe
 import librosa 
 from datetime import datetime, timedelta
-
+from pathlib import Path 
 class File:
     def init(self, filepath: str):
         self.filepath = filepath
@@ -203,6 +203,10 @@ def metadatas(filepaths: list, extended=False, stevens=False) -> dankframe.DankF
     """
 
     metadatas = dankframe.pd.DataFrame([metadata(filepath, extended) for filepath in filepaths])
+
+    if len(metadatas) == 0: 
+        return metadatas
+
 
     if stevens: 
         for row, group in metadatas.groupby(["start", "channel"]):
