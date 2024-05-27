@@ -485,7 +485,7 @@ xtick.minor.top: True
 xtick.minor.bottom: True
 xtick.major.pad: 5.0
 xtick.minor.pad: 5.0
-ytick.labelsize:large
+ytick.labelsize:medium
 
 ytick.left: True
 ytick.right: True
@@ -501,7 +501,7 @@ ytick.minor.left: True
 ytick.minor.right: True
 ytick.major.pad: 5.0
 ytick.minor.pad: 5.0
-xtick.labelsize:large
+xtick.labelsize:medium
 ## ***************************************************************************
 
 
@@ -562,7 +562,7 @@ figure.dpi: 300       # figure dots per inch
 #figure.raise_window : True    # Raise the GUI window to front when show() is called.
 
 ## The figure subplot parameters.  All dimensions are a fraction of the figure width and height.
-#figure.subplot.left:   0.125  # the left side of the subplots of the figure
+# figure.subplot.left:   0.4  # the left side of the subplots of the figure
 #figure.subplot.right:  0.9    # the right side of the subplots of the figure
 #figure.subplot.bottom: 0.11   # the bottom of the subplots of the figure
 #figure.subplot.top:    0.88   # the top of the subplots of the figure
@@ -575,7 +575,7 @@ figure.dpi: 300       # figure dots per inch
 figure.autolayout: True  # When True, automatically adjust subplot
                            # parameters to make the plot fit the figure
                            # using `tight_layout`
-#figure.constrained_layout.use: False  # When True, automatically make plot
+figure.constrained_layout.use: False  # When True, automatically make plot
                                        # elements fit on the figure. (Not
                                        # compatible with `autolayout`, above).
 #figure.constrained_layout.h_pad:  0.04167  # Padding around axes objects. Float representing
@@ -583,6 +583,10 @@ figure.autolayout: True  # When True, automatically adjust subplot
 #figure.constrained_layout.hspace: 0.02     # Space between subplot groups. Float representing
 #figure.constrained_layout.wspace: 0.02     # a fraction of the subplot widths being separated.
 
+#figure.constrained_layout.h_pad:  0.04167  # Padding around axes objects. Float representing
+# figure.constrained_layout.w_pad:  0.5  # inches. Default is 3/72 inches (3 points)
+#figure.constrained_layout.hspace: 0.02     # Space between subplot groups. Float representing
+#figure.constrained_layout.wspace: 0.02     # a fraction of the subplot widths being separated.
 
 ## ***************************************************************************
 ## * IMAGES                                                                  *

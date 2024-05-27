@@ -30,9 +30,10 @@ setup(
         "sqlalchemy",
         "sqlalchemy-utils",
         "scikit-learn", 
-        "docx", 
+        "python-docx", 
         "statsmodels",
         "python-dateutil",
-        "noisereduce"
+        "noisereduce",
+        "tukey"
     ],
 )
