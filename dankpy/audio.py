@@ -313,10 +313,16 @@ class Audio:
             ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M:%S"))
             # ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=2))
 
-        if showscale:
-            cbar = fig.colorbar(  # noqa: F841
-                axi, location="right", ticks=[zmin, zmax]
+        if showscale == "right":
+            cbar = fig.colorbar(
+                axi, location="right", orientation="vertical", ticks=[zmin, zmax]
             )
+            cbar.ax.set_ylabel("Power [dB]")
+        elif showscale =="top": 
+            cbar = fig.colorbar(
+                axi, location="top", orientation="horizontal", ticks=[zmin, zmax]
+            )
+            cbar.ax.set_title("Power [dB]")           
 
         if fig: 
             return fig, ax

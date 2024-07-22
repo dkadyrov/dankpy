@@ -1,6 +1,7 @@
 import math
 from numpy import cos, absolute, pi
 import numpy as np
+from dankpy.mymaptiles import mymaptiles
 
 
 def lla_to_flatdumb(
@@ -52,7 +53,7 @@ def flat_to_lla(
     lon = x * 180 / (pi * re_c) + lon0
     lat = y * 180 / (pi * re) + lat0
     alt = z + alt0
-    
+
     return (lat, lon, alt)
 
 
@@ -107,6 +108,7 @@ def lla2flat(lla: list, llo: list, psio: float, href: float) -> list:
 
     return Xp, Yp, Zp
 
+
 def zoom_center(
     lons: tuple = None,
     lats: tuple = None,
@@ -115,7 +117,6 @@ def zoom_center(
     projection: str = "mercator",
     width_to_height: float = 2.0,
 ) -> tuple:
-
     """
     _summary_
 
@@ -126,7 +127,6 @@ def zoom_center(
     Returns:
         _type_: _description_
     """
-
 
     if lons is None and lats is None:
         if isinstance(lonlats, tuple):
@@ -179,3 +179,91 @@ def zoom_center(
         raise NotImplementedError(f"{projection} projection is not implemented")
 
     return zoom, center
+
+def find_extents(latitudes, longitudes): 
+    """
+    Find the extents of a set of latitudes and longitudes
+
+    Args:
+        latitudes (list): List of latitude values
+        longitudes (list): List of longitude values
+
+    Returns:
+        tuple: Extents of the latitudes and longitudes (minlon, maxlon, minlat, maxlat)
+    """
+    minlon = min(longitudes)
+    maxlon = max(longitudes)
+    minlat = min(latitudes)
+    maxlat = max(latitudes)
+    
+    return minlon, minlat, maxlon, maxlat
+
+
+def plot_basemap(
+    ax, extents, map_url="http://tile.openstreetmap.org/{z}/{x}/{y}.png", z=16
+):
+    # plot the map
+    (ax0, axi) = mymaptiles.draw_map(extents, tile=map_url, ax=ax, z=z)
+    axi.set_interpolation("lanczos")
+
+    return ax0, axi
+
+def get_meters_per_lat_lon(lat):
+    """Returns the meters per degree latitude and longitude at a given latitude.
+
+    :param lat: latitude in decimal degrees
+    :return: meters per degree latitude, meters per degree longitude
+    """
+    r = 6378101.0  # Radius of earth in meters.
+    meters_per_lat = np.pi * r / 180.0
+    meters_per_lon = np.pi * r / 180.0 * np.cos(np.radians(lat))
+    return meters_per_lat, meters_per_lon
+
+def axes_aspect_expander(extents, sz, pad_meters=100):
+    """Returns the extents of a map that will fit the given extents
+    with the given aspect ratio.
+    """
+    sz_extent = [extents[2] - extents[0], extents[3] - extents[1]]
+    center = [(extents[0] + extents[2]) / 2, (extents[1] + extents[3]) / 2]
+    meters_per_lat, meters_per_lon = get_meters_per_lat_lon(center[1])
+    sz_extent[0] += pad_meters * 2 / meters_per_lon
+    sz_extent[1] += pad_meters * 2 / meters_per_lat
+    # make sure the aspect ratio of underlying map is correct
+    if sz_extent[0] / sz_extent[1] > sz[0] / sz[1]:
+        sz_extent[1] = sz_extent[0] * sz[1] / sz[0]
+    else:
+        sz_extent[0] = sz_extent[1] * sz[0] / sz[1]
+
+    extents = [
+        center[0] - sz_extent[0] / 2,
+        center[1] - sz_extent[1] / 2,
+        center[0] + sz_extent[0] / 2,
+        center[1] + sz_extent[1] / 2,
+    ]
+    return extents
+
+def map_auto_zoom(lon1, lon2) -> int:
+    # Heuristic determination of zoom level
+    #   we find z such that: 360/2^z ~ width/2
+    #   i.e. roughly two tiles to cover the width
+    lon1 = lon1 % 360
+    lon2 = lon2 % 360
+    width = lon2 - lon1
+    if width < 0:
+        # case when the range overlaps the longitude zero point.
+        # e.g. 350 to 20 --> -330 + 360 = 30
+        width += 360
+
+    return round(np.log2(360 * 2.0) - np.log2(width / 1.5))
+
+sources = {
+    "World_Light_Gray_Base": "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+    "OSM": "http://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    "World_Street_Map": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+    "World_Imagery": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    "USGSImageryTopo": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryTopo/MapServer/tile/{z}/{y}/{x}",
+    "USGSImageryOnly": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}",
+    "USGSTopo": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}",
+    "NatGeo_World_Map": "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}",
+    "ESRI WorldImagery": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+}

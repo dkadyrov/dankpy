@@ -11,6 +11,19 @@ def meters_to_feet(m: float) -> float:
     """
     return 3.28084 * m
 
+def inches_to_meters(inches: float) -> float:
+    """
+    Converts Inches to Meters
+
+    Args:
+        inches: Float in inches
+
+    Returns:
+        Float in meters
+
+    """
+    return inches * 0.0254
+
 
 def feet_to_meters(ft: float) -> float:
     """
