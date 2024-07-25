@@ -1,7 +1,7 @@
 import math
 from numpy import cos, absolute, pi
 import numpy as np
-from dankpy.mymaptiles import mymaptiles
+from dankpy.maputils import mymaptiles
 
 
 def lla_to_flatdumb(

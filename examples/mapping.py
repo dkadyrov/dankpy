@@ -1,6 +1,6 @@
 #%%
 import maptiles
-from dankpy import mapping, mymaptiles
+from dankpy import maputils, mymaptiles
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 
@@ -13,12 +13,12 @@ longitudes = [-73.861427]
 # latitudes = [40.572, 40.573]
 # longitudes = [-73.861, -73.865]
 
-extents = mapping.find_extents(latitudes=latitudes, longitudes=longitudes)
+extents = maputils.find_extents(latitudes=latitudes, longitudes=longitudes)
 fig, ax = plt.subplots()
 
-extents = mapping.axes_aspect_expander(extents, sz=ax.figure.get_size_inches(), pad_meters=200)
+extents = maputils.axes_aspect_expander(extents, sz=ax.figure.get_size_inches(), pad_meters=200)
 
-mapurl = next(iter(mapping.sources.values()))
+mapurl = next(iter(maputils.sources.values()))
 (ax0, axi) = mymaptiles.draw_map(ax=ax, bounds=extents, tile=mapurl, z=16)
 axi.set_interpolation("lanczos")
 ax.xaxis.set_major_formatter(FormatStrFormatter("%.4f"))

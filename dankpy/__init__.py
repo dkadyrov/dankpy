@@ -5,7 +5,7 @@ from .color import *
 from .dt import * 
 from .file import *
 from .dankly import * 
-from .mapping import * 
+from .maputils import * 
 from .math import *
 from .functions import * 
 from .units import * 
