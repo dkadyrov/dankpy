@@ -479,15 +479,3 @@ def draw_map(bounds: tuple, tile: Tile="osm", z: int=None, aspect="auto",
         ax.set_ylim((extent[2], extent[3]), auto=False)
     
     return ax, ax_img
-
-
-# if __name__ == '__main__':
-#     ## built in example 
-#     bounds = [	-77.434821-.1, 	37.540408-.1, 	-77.434821 + .1, 	37.540408 + .1]
-
-#     draw_map(bounds, 
-#             tile='http://tile.openstreetmap.org/{z}/{x}/{y}.png'
-#             )
-            
-
-#     plt.show(  )

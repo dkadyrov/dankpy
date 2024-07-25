@@ -1,8 +1,7 @@
 import math
 from numpy import cos, absolute, pi
 import numpy as np
-from dankpy.maputils import mymaptiles
-
+from dankpy.mapping import maputils
 
 def lla_to_flatdumb(
     lat: float, lon: float, alt: float, lat0: float, lon0: float, alt0: float
@@ -199,11 +198,11 @@ def find_extents(latitudes, longitudes):
     return minlon, minlat, maxlon, maxlat
 
 
-def plot_basemap(
+def plot_map(
     ax, extents, map_url="http://tile.openstreetmap.org/{z}/{x}/{y}.png", z=16
 ):
     # plot the map
-    (ax0, axi) = mymaptiles.draw_map(extents, tile=map_url, ax=ax, z=z)
+    (ax0, axi) = maputils.draw_map(extents, tile=map_url, ax=ax, z=z)
     axi.set_interpolation("lanczos")
 
     return ax0, axi

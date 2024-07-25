@@ -1,31 +1,26 @@
 #%%
-import maptiles
-from dankpy import maputils, mymaptiles
+from dankpy import maputils, mapping
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
+import numpy as np 
 
-plt.style.use("dankpy.styles.mdpi")
+plt.style.use("dankpy.styles.simple")
 
-latitudes = [40.573555]
-longitudes = [-73.861427]
+latitudes = [40.71427000]
+longitudes = [-74.00597000]
 
-
-# latitudes = [40.572, 40.573]
-# longitudes = [-73.861, -73.865]
-
-extents = maputils.find_extents(latitudes=latitudes, longitudes=longitudes)
+extents = mapping.find_extents(latitudes=latitudes, longitudes=longitudes)
 fig, ax = plt.subplots()
 
-extents = maputils.axes_aspect_expander(extents, sz=ax.figure.get_size_inches(), pad_meters=200)
+extents = mapping.axes_aspect_expander(extents, sz=ax.figure.get_size_inches(), pad_meters=2000)
 
-mapurl = next(iter(maputils.sources.values()))
-(ax0, axi) = mymaptiles.draw_map(ax=ax, bounds=extents, tile=mapurl, z=16)
+mapurl = next(iter(mapping.sources.values()))
+(ax0, axi) = mapping.plot_map(ax=ax, extents=extents, map_url=mapurl, z=16)
 axi.set_interpolation("lanczos")
 ax.xaxis.set_major_formatter(FormatStrFormatter("%.4f"))
 ax.yaxis.set_major_formatter(FormatStrFormatter("%.4f"))
 ax.set_ylim(extents[1], extents[3])
 ax.set_xlim(extents[0], extents[2])
-ax.set_xticks([extents[0], extents[2]])
-ax.set_yticks([extents[1], extents[3]])
-fig
+ax.set_xticks(np.linspace(extents[0], extents[2], 4))
+ax.set_yticks(np.linspace(extents[1], extents[3], 4))
 #%%
