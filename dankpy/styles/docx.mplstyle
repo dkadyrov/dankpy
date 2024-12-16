@@ -259,8 +259,8 @@ lines.linewidth: 0.5               # line width in points
 ## relative to font.size, using the following values: xx-small, x-small,
 ## small, medium, large, x-large, xx-large, larger, or smaller
 
-font.family: serif
-font.serif: "Times New Roman"
+font.family: sans-serif
+font.serif: "Aptos"
 
 # font.family: sans-serif
 # font.sans-serif: "Arial"
@@ -269,7 +269,7 @@ font.serif: "Times New Roman"
 #font.variant: normal
 #font.weight:  normal
 #font.stretch: normal
-#font.size:    10.0
+font.size:    10.0
 
 #font.serif:      DejaVu Serif, Bitstream Vera Serif, Computer Modern Roman, New Century Schoolbook, Century Schoolbook L, Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif
 #font.sans-serif: DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif
@@ -555,7 +555,7 @@ legend.fontsize: medium
 #figure.titleweight: normal    # weight of the figure title
 #figure.labelsize:   large     # size of the figure label (``Figure.sup[x|y]label()``)
 #figure.labelweight: normal    # weight of the figure label
-figure.figsize: 6.5, 2.0  # figure size in inches
+figure.figsize: 6, 3  # figure size in inches
 figure.dpi: 300       # figure dots per inch
 #figure.facecolor:   white     # figure face color
 #figure.edgecolor:   white     # figure edge color

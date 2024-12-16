@@ -327,6 +327,109 @@ class Audio:
         if fig: 
             return fig, ax
 
+    def plot_melspectrogram(
+        self,
+        window="hann",
+        nmels: int = 8192,
+        window_size: int = 8192,
+        nfft: int = 8192,
+        noverlap: int = 4096,
+        nperseg: int = 8192,
+        zmin: int = None,
+        zmax: int = None,
+        gain: int = 0,
+        showscale: bool = False,
+        cmap="jet",
+        aspect="auto",
+        time_format="datetime",
+        ax=None,
+        fmin=0, 
+        fmax=None
+    ):
+        if ax is None:
+            fig, ax = plt.subplots()
+        else: 
+            fig = None
+
+        if fmax is None:
+            fmax = self.sample_rate / 2
+
+        Pxx = librosa.feature.melspectrogram(
+            y=self.audio,
+            sr=self.sample_rate,
+            n_fft=nfft,
+            hop_length=noverlap,
+            n_mels=128,
+            fmin=fmin,
+            fmax=fmax,
+        )
+
+        Pxx = 10 * np.log10(Pxx) + gain
+
+        if zmin is None:
+            zmin = Pxx.min()
+        if zmax is None:
+            zmax = Pxx.max()
+
+        if time_format == "seconds":
+            extents = [
+                self.data["time [s]"].min(),
+                self.data["time [s]"].max(),
+                fmin,
+                fmax,
+            ]
+        elif time_format == "ms":
+            extents = [
+                self.data["time [ms]"].min(),
+                self.data["time [ms]"].max(),
+                fmin(),
+                fmax(),
+            ]
+        elif time_format == "samples":
+            extents = [0, len(self.data), fmin, fmax]
+        else:
+            extents = [self.start, self.end, fmin, fmax]
+
+        axi = ax.imshow(
+            Pxx,
+            cmap=cmap,
+            aspect=aspect,
+            extent=extents,
+            origin="lower",
+        )
+        axi.set_clim([zmin, zmax])
+
+        ax.set_ylabel("Frequency [Hz]")
+
+        if time_format == "seconds":
+            ax.set_xlabel("Time [s]")
+            ax.set_xlim(self.data["time [s]"].min(), round(self.data["time [s]"].max()))
+        elif time_format == "ms":
+            ax.set_xlabel("Time [ms]")
+            ax.set_xlim(
+                self.data["time [ms]"].min(), round(self.data["time [ms]"].max())
+            )
+        elif time_format == "samples":
+            ax.set_xlabel("Samples")
+            ax.set_xlim(0, len(self.data))
+        else:
+            ax.set_xlim([self.data.datetime.iloc[0], self.data.datetime.iloc[-1]])
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M:%S"))
+            # ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=2))
+
+        if showscale == "right":
+            cbar = fig.colorbar(
+                axi, location="right", orientation="vertical", ticks=[zmin, zmax]
+            )
+            cbar.ax.set_ylabel("Power [dB]")
+        elif showscale =="top": 
+            cbar = fig.colorbar(
+                axi, location="top", orientation="horizontal", ticks=[zmin, zmax]
+            )
+            cbar.ax.set_title("Power [dB]")           
+
+        if fig: 
+            return fig, ax
     # def spectrograph(
     #     self,
     #     window_size: int = 8192,
@@ -784,6 +887,7 @@ def spectrogram(
         time = time
 
     return time, frequency, Pxx
+
 
 
 # def spectrograph(

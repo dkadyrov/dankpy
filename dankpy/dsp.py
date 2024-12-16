@@ -1,7 +1,20 @@
 import numpy as np
 import pandas as pd
-from scipy.signal import tukey, correlate, savgol_filter
+from scipy.signal import correlate, savgol_filter
 from statsmodels.nonparametric.smoothers_lowess import lowess
+from scipy.signal.windows import tukey
+
+
+def count_crossings(arr, target):
+    count = 0
+    previous = arr[0]
+    
+    for current in arr[1:]:
+        if (previous < target and current >= target) or (previous > target and current <= target):
+            count += 1
+        previous = current
+    
+    return count
 
 
 def lowess_smooth(x, y, size):

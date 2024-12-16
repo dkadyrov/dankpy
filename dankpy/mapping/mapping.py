@@ -3,6 +3,7 @@ from numpy import cos, absolute, pi
 import numpy as np
 from dankpy.mapping import maputils
 
+
 def lla_to_flatdumb(
     lat: float, lon: float, alt: float, lat0: float, lon0: float, alt0: float
 ) -> tuple:
@@ -179,7 +180,8 @@ def zoom_center(
 
     return zoom, center
 
-def find_extents(latitudes, longitudes): 
+
+def find_extents(latitudes, longitudes):
     """
     Find the extents of a set of latitudes and longitudes
 
@@ -194,18 +196,19 @@ def find_extents(latitudes, longitudes):
     maxlon = max(longitudes)
     minlat = min(latitudes)
     maxlat = max(latitudes)
-    
-    return minlon, minlat, maxlon, maxlat
+
+    return [minlon, minlat, maxlon, maxlat]
 
 
 def plot_map(
-    ax, extents, map_url="http://tile.openstreetmap.org/{z}/{x}/{y}.png", z=16
+    ax, extents, map_url="http://tile.openstreetmap.org/{z}/{x}/{y}.png", z=None
 ):
     # plot the map
     (ax0, axi) = maputils.draw_map(extents, tile=map_url, ax=ax, z=z)
     axi.set_interpolation("lanczos")
 
     return ax0, axi
+
 
 def get_meters_per_lat_lon(lat):
     """Returns the meters per degree latitude and longitude at a given latitude.
@@ -217,6 +220,7 @@ def get_meters_per_lat_lon(lat):
     meters_per_lat = np.pi * r / 180.0
     meters_per_lon = np.pi * r / 180.0 * np.cos(np.radians(lat))
     return meters_per_lat, meters_per_lon
+
 
 def axes_aspect_expander(extents, sz, pad_meters=100):
     """Returns the extents of a map that will fit the given extents
@@ -241,6 +245,7 @@ def axes_aspect_expander(extents, sz, pad_meters=100):
     ]
     return extents
 
+
 def map_auto_zoom(lon1, lon2) -> int:
     # Heuristic determination of zoom level
     #   we find z such that: 360/2^z ~ width/2
@@ -255,6 +260,7 @@ def map_auto_zoom(lon1, lon2) -> int:
 
     return round(np.log2(360 * 2.0) - np.log2(width / 1.5))
 
+
 sources = {
     "World_Light_Gray_Base": "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
     "OSM": "http://tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -266,3 +272,49 @@ sources = {
     "NatGeo_World_Map": "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}",
     "ESRI WorldImagery": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
 }
+
+
+def get_meters_per_lat_lon(lat):
+    """Returns the meters per degree latitude and longitude at a given latitude.
+
+    :param lat: latitude in decimal degrees
+    :return: meters per degree latitude, meters per degree longitude
+    """
+    r = 6378101.0  # Radius of earth in meters.
+    meters_per_lat = np.pi * r / 180.0
+    meters_per_lon = np.pi * r / 180.0 * np.cos(np.radians(lat))
+    return meters_per_lat, meters_per_lon
+
+
+def make_range_circles(clat, clon, step=100, max_range=1000):
+    """Range circle generator centered on lat,lon
+    with a step size of step and a maximum range of max_range.
+    The circles are plotted in the current projection.
+    """
+
+    meters_per_lat, meters_per_lon = get_meters_per_lat_lon(clat)
+
+    for rad in range(step, max_range + step, step):
+        num_points = int(6 * np.sqrt(rad) + 0.5)
+        y = np.sin(np.linspace(0, 2 * np.pi, num_points)) * rad / meters_per_lat
+        x = np.cos(np.linspace(0, 2 * np.pi, num_points)) * rad / meters_per_lon
+        lon, lat = clon + x, clat + y
+        yield [(lon), (lat)]
+
+
+def extend_by_distance(standpoint, meters):
+    tentative_circle = make_range_circles(
+        standpoint["latitude"],
+        standpoint["longitude"],
+        meters,
+        meters,
+    ).__next__()
+
+    extents = [
+        tentative_circle[0].min(),
+        tentative_circle[1].min(),
+        tentative_circle[0].max(),
+        tentative_circle[1].max(),
+    ]
+
+    return extents

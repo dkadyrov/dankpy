@@ -30,6 +30,79 @@ def get_ax_size(fig, ax):
     return width, height
 
 
+def set_size(fig, axs, w, h, margin=2, header=2):
+    """w, h: width, height in inches"""
+
+    if isinstance(axs, np.ndarray):
+        # get number of columns in the figure
+        ncols = len(axs[0])
+        # get number of rows in the figure
+        nrows = len(axs)
+
+        for ax in axs.flatten(order="F"):
+            l = ax.figure.subplotpars.left
+            r = ax.figure.subplotpars.right
+            t = ax.figure.subplotpars.top
+            b = ax.figure.subplotpars.bottom
+            figw = float(w) / (r - l)
+            figh = float(h) / (t - b)
+
+            ax.figure.set_size_inches(figw, figh)
+    else:
+        ncols = 1
+        nrows = 1
+
+        ax = axs
+        l = ax.figure.subplotpars.left
+        r = ax.figure.subplotpars.right
+        t = ax.figure.subplotpars.top
+        b = ax.figure.subplotpars.bottom
+        figw = float(w) / (r - l)
+        figh = float(h) / (t - b)
+        ax.figure.set_size_inches(figw, figh)
+
+    width = ncols * w #(margin + w + margin)
+    height = nrows * h #(header + h + header)
+
+    fig.set_size_inches(width, height)
+
+    return fig, axs
+
+
+def dankplots(
+    nrows, ncols, margin=2, header=2, subheight=8, subwidth=8
+):  ## now it is in cm
+    m = margin
+    h = header
+
+    a = subheight
+    b = subwidth
+
+    ## Here I calculate the figure size that you need for these parameters, as OP asked for.
+
+    width = ncols * (m + b + m)
+    height = nrows * (h + a + h)
+
+    axarr = np.empty((nrows, ncols), dtype=object)
+
+    # print(height, width)
+
+    fig = plt.figure(figsize=(width, height))
+
+    for i in range(nrows):
+        for j in range(ncols):
+            axarr[i, j] = fig.add_axes(
+                [
+                    (m + j * (2 * m + b)) / width,
+                    (height - (i + 1) * (2 * h + a) + h) / height,
+                    b / width,
+                    a / height,
+                ]
+            )
+
+    return fig, axarr
+
+
 class Okabeito(object):
     def __init__(self):
         self.colors = OrderedDict()
@@ -105,16 +178,3 @@ def subplots(
         axarr = axarr[0][0]
 
     return fig, axarr
-
-
-def set_size(w, h, ax=None):
-    """w, h: width, height in inches"""
-    if not ax:
-        ax = plt.gca()
-    l = ax.figure.subplotpars.left
-    r = ax.figure.subplotpars.right
-    t = ax.figure.subplotpars.top
-    b = ax.figure.subplotpars.bottom
-    figw = float(w) / (r - l)
-    figh = float(h) / (t - b)
-    ax.figure.set_size_inches(figw, figh)

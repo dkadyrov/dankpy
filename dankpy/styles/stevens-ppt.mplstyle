@@ -113,7 +113,7 @@
 ## ***************************************************************************
 ## See https://matplotlib.org/stable/api/artist_api.html#module-matplotlib.lines
 ## for more information on line properties.
-lines.linewidth: 0.75               # line width in points
+lines.linewidth: 0.5               # line width in points
 #lines.linestyle: -                 # solid line
 #lines.color:     C0                # has no affect on plot(); see axes.prop_cycle
 #lines.marker:          None        # the default marker
@@ -259,13 +259,14 @@ lines.linewidth: 0.75               # line width in points
 ## relative to font.size, using the following values: xx-small, x-small,
 ## small, medium, large, x-large, xx-large, larger, or smaller
 
-font.family: serif
-font.serif: times
+# font.family: "IBM Plex Sans"
+font.family: sans-serif
+font.sans-serif: "IBM Plex Sans"
 #font.style:   normal
 #font.variant: normal
 #font.weight:  normal
 #font.stretch: normal
-font.size:    8.0
+#font.size:    10.0
 
 #font.serif:      DejaVu Serif, Bitstream Vera Serif, Computer Modern Roman, New Century Schoolbook, Century Schoolbook L, Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif
 #font.sans-serif: DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif
@@ -311,7 +312,7 @@ font.size:    8.0
 ## ***************************************************************************
 ## For more information on LaTeX properties, see
 ## https://matplotlib.org/stable/tutorials/text/usetex.html
-text.usetex: True  # use latex for all text handling. The following fonts
+text.usetex: False  # use latex for all text handling. The following fonts
                      # are supported through the usual rc parameter settings:
                      # new century schoolbook, bookman, times, palatino,
                      # zapf chancery, charter, serif, sans-serif, helvetica,
@@ -334,15 +335,15 @@ text.usetex: True  # use latex for all text handling. The following fonts
                         # loaded, depending on your font settings.
 
 ## The following settings allow you to select the fonts in math mode.
-mathtext.fontset: "custom"  # Should be 'dejavusans' (default),
+#mathtext.fontset: dejavusans  # Should be 'dejavusans' (default),
                                # 'dejavuserif', 'cm' (Computer Modern), 'stix',
                                # 'stixsans' or 'custom'
 ## "mathtext.fontset: custom" is defined by the mathtext.bf, .cal, .it, ...
 ## settings which map a TeX font name to a fontconfig font pattern.  (These
 ## settings are not used for other font sets.)
-mathtext.bf:  times
-# mathtext.cal: 
-mathtext.it:  times
+#mathtext.bf:  sans:bold
+#mathtext.cal: cursive
+#mathtext.it:  sans:italic
 #mathtext.rm:  sans
 #mathtext.sf:  sans
 #mathtext.tt:  monospace
@@ -369,13 +370,13 @@ axes.linewidth: 1    # edge line width
 #axes.grid.axis:     both    # which axis the grid should apply to
 #axes.grid.which:    major   # grid lines at {major, minor, both} ticks
 #axes.titlelocation: center  # alignment of the title: {left, right, center}
-axes.titlesize: 8.0   # font size of the axes title
+axes.titlesize: large   # font size of the axes title
 #axes.titleweight:   normal  # font weight of title
 #axes.titlecolor:    auto    # color of the axes title, auto falls back to
                              # text.color as default value
 #axes.titley:        None    # position title (axes relative units).  None implies auto
 axes.titlepad:      8.0     # pad between axes and title in points
-axes.labelsize: 8.0  # font size of the x and y labels
+axes.labelsize: large  # font size of the x and y labels
 #axes.labelpad:      4.0     # space between label and axis
 #axes.labelweight:   normal  # weight of the x and y labels
 #axes.labelcolor:    black
@@ -420,8 +421,8 @@ axes.formatter.use_mathtext: True  # When True, use mathtext for scientific
                   # See also https://matplotlib.org/stable/tutorials/intermediate/color_cycle.html
                   # for more details on prop_cycle usage.
 
-axes.prop_cycle : (cycler('color', ['k', 'r', 'b', 'g']) + cycler('ls', ['-', '--', ':', '-.']))
-# axes.prop_cycle: (cycler('color', ['#006BA4', '#FF800E', '#ABABAB', '#595959', '#5F9ED1', '#C85200', '#898989', '#A2C8EC', '#FFBC79', '#CFCFCF']) + cycler('ls', ['-', '--', ':', '-.']))
+axes.prop_cycle : (cycler('color', ['k', 'r', 'b', 'g', 'y', 'c']) + cycler('ls', ['-', '--', ':', '-.', '-', '--']))
+
 axes.xmargin:   .05  # x margin.  See `axes.Axes.margins`
 axes.ymargin:   .05  # y margin.  See `axes.Axes.margins`
 axes.zmargin:   .05  # z margin.  See `axes.Axes.margins`
@@ -429,7 +430,7 @@ axes.autolimit_mode: "round_numbers" #round_numbers  # If "data", use axes.xmarg
                             # If "round_numbers", after application of margins, axis
                             # limits are further expanded to the nearest "round" number.
 #polaraxes.grid: True  # display grid on polar axes
-axes3d.grid:    False  # display grid on 3D axes
+#axes3d.grid:    True  # display grid on 3D axes
 
 #axes3d.xaxis.panecolor:    (0.95, 0.95, 0.95, 0.5)  # background pane on 3D axes
 #axes3d.yaxis.panecolor:    (0.90, 0.90, 0.90, 0.5)  # background pane on 3D axes
@@ -536,11 +537,11 @@ legend.fontsize: medium
 ## Dimensions as fraction of font size:
 #legend.borderpad:     0.4  # border whitespace
 # legend.labelspacing:  0.5  # the vertical space between the legend entries
-legend.handlelength:  1  # the length of the legend lines
+# legend.handlelength:  1.0  # the length of the legend lines
 # legend.handleheight:  0.5  # the height of the legend handle
-legend.handletextpad: 0.5  # the space between the legend line and legend text
+#legend.handletextpad: 0.8  # the space between the legend line and legend text
 #legend.borderaxespad: 0.5  # the border between the axes and legend edge
-legend.columnspacing: .75  # column separation
+#legend.columnspacing: 2.0  # column separation
 
 
 ## ***************************************************************************
@@ -551,7 +552,8 @@ legend.columnspacing: .75  # column separation
 #figure.titleweight: normal    # weight of the figure title
 #figure.labelsize:   large     # size of the figure label (``Figure.sup[x|y]label()``)
 #figure.labelweight: normal    # weight of the figure label
-figure.figsize: 5.5, 1.5  # figure size in inches
+# figure.figsize: 16.5, 6  # figure size in inches
+figure.figsize: 5.67, 4.76
 figure.dpi: 300       # figure dots per inch
 #figure.facecolor:   white     # figure face color
 #figure.edgecolor:   white     # figure edge color

@@ -265,7 +265,7 @@ font.serif: "Palatino Linotype"
 #font.variant: normal
 #font.weight:  normal
 #font.stretch: normal
-font.size:    8.0
+font.size: 10
 
 #font.serif:      DejaVu Serif, Bitstream Vera Serif, Computer Modern Roman, New Century Schoolbook, Century Schoolbook L, Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif
 #font.sans-serif: DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif
@@ -369,13 +369,13 @@ axes.linewidth: 1    # edge line width
 #axes.grid.axis:     both    # which axis the grid should apply to
 #axes.grid.which:    major   # grid lines at {major, minor, both} ticks
 #axes.titlelocation: center  # alignment of the title: {left, right, center}
-axes.titlesize: 8.0   # font size of the axes title
+# axes.titlesize: 12   # font size of the axes title
 #axes.titleweight:   normal  # font weight of title
 #axes.titlecolor:    auto    # color of the axes title, auto falls back to
                              # text.color as default value
 #axes.titley:        None    # position title (axes relative units).  None implies auto
-axes.titlepad:      8.0     # pad between axes and title in points
-axes.labelsize: 8.0  # font size of the x and y labels
+# axes.titlepad: 12     # pad between axes and title in points
+# axes.labelsize: 12  # font size of the x and y labels
 #axes.labelpad:      4.0     # space between label and axis
 #axes.labelweight:   normal  # weight of the x and y labels
 #axes.labelcolor:    black
@@ -420,11 +420,11 @@ axes.formatter.use_mathtext: True  # When True, use mathtext for scientific
                   # See also https://matplotlib.org/stable/tutorials/intermediate/color_cycle.html
                   # for more details on prop_cycle usage.
 
-axes.prop_cycle : (cycler('color', ['k', 'r', 'b', 'g']) + cycler('ls', ['-', '--', ':', '-.']))
+axes.prop_cycle: (cycler('color', ['k', 'r', 'b', 'g']) + cycler('ls', ['-', '--', ':', '-.']))
 # axes.prop_cycle: (cycler('color', ['#006BA4', '#FF800E', '#ABABAB', '#595959', '#5F9ED1', '#C85200', '#898989', '#A2C8EC', '#FFBC79', '#CFCFCF']) + cycler('ls', ['-', '--', ':', '-.']))
-axes.xmargin:   .05  # x margin.  See `axes.Axes.margins`
-axes.ymargin:   .05  # y margin.  See `axes.Axes.margins`
-axes.zmargin:   .05  # z margin.  See `axes.Axes.margins`
+axes.xmargin: .05  # x margin.  See `axes.Axes.margins`
+axes.ymargin: .05  # y margin.  See `axes.Axes.margins`
+axes.zmargin: .05  # z margin.  See `axes.Axes.margins`
 axes.autolimit_mode: "round_numbers" #round_numbers  # If "data", use axes.xmargin and axes.ymargin as is.
                             # If "round_numbers", after application of margins, axis
                             # limits are further expanded to the nearest "round" number.
@@ -485,7 +485,7 @@ xtick.minor.top: True
 xtick.minor.bottom: True
 xtick.major.pad: 5.0
 xtick.minor.pad: 5.0
-ytick.labelsize:medium
+ytick.labelsize: medium
 
 ytick.left: True
 ytick.right: True
@@ -501,7 +501,7 @@ ytick.minor.left: True
 ytick.minor.right: True
 ytick.major.pad: 5.0
 ytick.minor.pad: 5.0
-xtick.labelsize:medium
+xtick.labelsize: medium
 ## ***************************************************************************
 
 
@@ -512,31 +512,31 @@ xtick.labelsize:medium
 grid.color: black #"#b0b0b0"  # grid color
 #grid.linestyle: -          # solid
 #grid.linewidth: 0.8        # in points
-grid.alpha:     0.1        # transparency, between 0.0 and 1.0
+grid.alpha: 0.1        # transparency, between 0.0 and 1.0
 
 
 ## ***************************************************************************
 ## * LEGEND                                                                  *
 ## ***************************************************************************
-legend.loc:           best
-legend.frameon:       True     # if True, draw the legend on a background patch
-legend.framealpha:    1      # legend patch transparency
+legend.loc: best
+legend.frameon: True     # if True, draw the legend on a background patch
+legend.framealpha: 1      # legend patch transparency
 #legend.facecolor:     inherit  # inherit from axes.facecolor; or color spec
-legend.edgecolor:     0     # background patch boundary color
-legend.fancybox:      False     # if True, use a rounded box for the
+legend.edgecolor: 0     # background patch boundary color
+legend.fancybox: False     # if True, use a rounded box for the
                                 # legend background, else a rectangle
 #legend.shadow:        False    # if True, give background a shadow effect
 # legend.numpoints:     1        # the number of marker points in the legend line
 # legend.scatterpoints: 1        # number of scatter points
-legend.markerscale:   0.25      # the relative size of legend markers vs. original
-legend.fontsize: medium
+legend.markerscale: 0.25      # the relative size of legend markers vs. original
+# legend.fontsize: 12
 #legend.labelcolor:    None
 #legend.title_fontsize: None    # None sets to the same as the default axes.
 
 ## Dimensions as fraction of font size:
 #legend.borderpad:     0.4  # border whitespace
 # legend.labelspacing:  0.5  # the vertical space between the legend entries
-legend.handlelength:  1  # the length of the legend lines
+legend.handlelength: 1  # the length of the legend lines
 # legend.handleheight:  0.5  # the height of the legend handle
 legend.handletextpad: 0.5  # the space between the legend line and legend text
 #legend.borderaxespad: 0.5  # the border between the axes and legend edge
@@ -551,7 +551,9 @@ legend.columnspacing: .75  # column separation
 #figure.titleweight: normal    # weight of the figure title
 #figure.labelsize:   large     # size of the figure label (``Figure.sup[x|y]label()``)
 #figure.labelweight: normal    # weight of the figure label
-figure.figsize: 5.6, 1.7305315203955498  # figure size in inches
+figure.figsize: 6, 1.5  # figure size in inches
+# figure.figsize: 15.5, 3.875
+# figure.figsize: 5.6, 1.7305315203955498
 figure.dpi: 300       # figure dots per inch
 #figure.facecolor:   white     # figure face color
 #figure.edgecolor:   white     # figure edge color
@@ -572,10 +574,10 @@ figure.dpi: 300       # figure dots per inch
                                # expressed as a fraction of the average axis height
 
 ## Figure layout
-figure.autolayout: True  # When True, automatically adjust subplot
+figure.autolayout: False  # When True, automatically adjust subplot
                            # parameters to make the plot fit the figure
                            # using `tight_layout`
-figure.constrained_layout.use: False  # When True, automatically make plot
+figure.constrained_layout.use: True  # When True, automatically make plot
                                        # elements fit on the figure. (Not
                                        # compatible with `autolayout`, above).
 #figure.constrained_layout.h_pad:  0.04167  # Padding around axes objects. Float representing
