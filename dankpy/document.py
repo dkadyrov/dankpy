@@ -9,15 +9,31 @@ import pandas as pd
 #     def __init__(self):
 #         self = Doc()
 
-def add_dataframe(doc: Document, df: pd.DataFrame):
-    t = doc.add_table(df.shape[0]+1, df.shape[1])
-    for j in range(df.shape[-1]):
-        t.cell(0,j).text = df.columns[j]
-    for i in range(df.shape[0]):
-        for j in range(df.shape[-1]):
-            t.cell(i+1,j).text = str(df.values[i,j])
+def add_dataframe(doc: Document, df: pd.DataFrame, transpose=False):
+    if transpose:
+        t = doc.add_table(df.shape[1] + 1, df.shape[0] + 1)
+        # Add the column headers
+        for j in range(df.shape[0]):
+            t.cell(0, j + 1).text = str(df.index[j])
+        t.cell(0, 0).text = ""
+        # Add the row headers
+        for i in range(df.shape[1]):
+            t.cell(i + 1, 0).text = str(df.columns[i])
+        # Add the DataFrame values
+        for i in range(df.shape[1]):
+            for j in range(df.shape[0]):
+                t.cell(i + 1, j + 1).text = str(df.values[j, i])
+    else:
+        t = doc.add_table(df.shape[0] + 1, df.shape[1])
+        # Add the column headers
+        for j in range(df.shape[1]):
+            t.cell(0, j).text = str(df.columns[j])
+        # Add the DataFrame values
+        for i in range(df.shape[0]):
+            for j in range(df.shape[1]):
+                t.cell(i + 1, j).text = str(df.values[i, j])
 
-    return t         
+    return t
 
 def add_figure(doc: Document, fig, ax, caption=None, add_break=True):
     memfile = BytesIO()
